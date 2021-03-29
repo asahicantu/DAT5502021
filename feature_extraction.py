@@ -17,7 +17,7 @@ def wav_to_mfcc(filepath, n_mfcc=20, min_freq=27.5, max_freq=20000):
 
 def wav_to_cq(filepath, n_bins=88, min_freq=27.5):
     audio_data, sample_rate = librosa.load(filepath)
-    cqt = librosa.cqt(y=audio_data, sr=sample_rate, fmin=min_freq, n_bins=88)
-    cqt_db = librosa.amplitude_to_db(cqt, ref=np.max)
+    cqt = librosa.cqt(y=audio_data, sr=sample_rate, fmin=min_freq, n_bins=n_bins)
+    cqt_db = librosa.amplitude_to_db(np.abs(cqt), ref=np.max)
     
     return cqt_db, sample_rate
