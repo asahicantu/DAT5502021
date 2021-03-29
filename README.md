@@ -21,6 +21,11 @@ http://theremin.music.uiowa.edu/MISpiano.html
 https://github.com/attejensen/abctool
 https://github.com/g4brielvs/python-tomita
 
+
+### SoundFonts
+https://github.com/FluidSynth/fluidsynth/wiki/SoundFont
+
+
 ## Algorithms
 - Spectrogram
 - MFCC Spectrogram
@@ -34,11 +39,13 @@ https://github.com/g4brielvs/python-tomita
 https://github.com/tensorflow/docs/tree/master/site/en/
 
 
+## Used Datasets
+### [PIANO Notes Transcription from Kaggle](https://www.kaggle.com/arshadgeek/piano-notes-transcription)
+This dataset is used by default to explore data frequencies
+    
 
 ## Candidate datasets
-- **https://www.kaggle.com/arshadgeek/piano-notes-transcription**
-  
-## Optional datasets
+
 - https://www.kaggle.com/juliancienfuegos/what-is-a-note
 - https://www.kaggle.com/soumikrakshit/classical-music-midi
 - https://magenta.tensorflow.org/datasets/maestro#v300
@@ -67,4 +74,3 @@ https://www.kaggle.com/asahicantu/dat550-2021-final-project/
 6. [] 
 
  
-
