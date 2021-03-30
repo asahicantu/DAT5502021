@@ -75,6 +75,9 @@ def load_midi(file_path, chunks_per_second=1):
     #print(mid.length)
     return None
 
+
+
+
 def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16):
     MIDI_NOTES = 87 # Starting from A0 to C8
     MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
@@ -92,6 +95,12 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
         print(f'step {note_step} {message}')
         note_idx   = message.note - MIDI_OFFSET
         delta_time += message.time
+
+        while delta_time > note_factor :
+            note_val = ''.join([str(x) for x in notes.tolist()])
+            time_notes.append((round(note_factor,4), note_val))
+            delta_time -= note_factor
+        #note_val = ''.join([str(x) for x in np.zeros(MIDI_NOTES,dtype=int).tolist()])
         
         if delta_time / note_factor > 1:
             delta_time -= note_factor
@@ -115,10 +124,12 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
     
     return time_notes
 #mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
-mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
+#mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
+mid = load_midi(r"TestData\\sample.mid")     
+play_midi(mid)
 a = split_midi(mid)
 #m_data,mid = play_midi(r"TestData\sample.mid")     
-#play_midi(mid,max_steps=7)
+
 print(len(a))
 a
 #%%
