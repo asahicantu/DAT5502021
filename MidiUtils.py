@@ -38,6 +38,7 @@ DEFAULT_TEMPO = 500000 # BITS PER SECOND = 0.5 SECONDS PER BEAT
 DEFAULT_TICKS_PER_BEAT = 480 # 4
 NOTE_32 = 1/32
 NOTE_16 = 1/16
+NOTES_8 = 1/8
 MIDI_NOTES = 87 # Starting from A0 to C8
 MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
 # The default tempo is 120 BPM.
@@ -147,24 +148,26 @@ def recreate_mid(mid_msgs):
     for msg in mid_msgs:
         track.append(msg)
     return mid
+
+def pretty_print_vector(vec):
+    for v in vec:
+        print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
 #%%            
-
-#mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
-#mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
-#mid = load_midi(r"TestData\\sample.mid")     
-mid = load_midi(r"..\data\archive\data\anime\Suiheisen.mid")     
-
-tempo = get_mid_tempo(mid,track_idx = 0)
-#play_midi(mid)
-vec = split_midi(mid)
-msgs = mid_msgs = vec_to_mid(vec,tempo = tempo)
-mid = recreate_mid(msgs)
-# for v in vec:
-#     print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
-#for 
-#mid.print_tracks()
-play_midi(mid)
-mid.print_tracks()
+def test():
+    #mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
+    #mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
+    #mid = load_midi(r"TestData\\sample.mid")     
+    mid = load_midi(r"..\data\archive\data\anime\Suiheisen.mid")     
+    tempo = get_mid_tempo(mid,track_idx = 0)
+    #play_midi(mid)
+    vec = split_midi(mid)
+    
+    #msgs = mid_msgs = vec_to_mid(vec,tempo = tempo)
+    #mid = recreate_mid(msgs)
+    #for 
+    #mid.print_tracks()
+    #play_midi(mid)
+    #mid.print_tracks()
 
 
 # %%
