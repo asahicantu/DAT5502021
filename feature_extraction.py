@@ -25,5 +25,5 @@ def wav_to_cq(filepath, n_bins=88, min_freq=27.5):
     return normalize(cqt_db), sample_rate
 
 # scale a spectrogram of a relative db range to [0, 1] where 1 is the peak volume
-def normalize(C, db_range = DB_RANGE):
-    return (C+db_range)/db_range
+def normalize(C):
+    return (C - np.min(C))/(np.max(C)-np.min(C))
