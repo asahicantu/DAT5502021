@@ -172,3 +172,10 @@ def test():
 
 
 # %%
+
+from midi2audio import FluidSynth
+MIDI_SOUND_FONT = "Soundfont/198_Yamaha_SY1_piano.sf2"
+
+def midi2wave(midi_filepath, out_filepath, sound_font=MIDI_SOUND_FONT, sample_rate=44100):
+    fs = FluidSynth(sound_font=MIDI_SOUND_FONT, sample_rate=sample_rate)
+    fs.midi_to_audio(midi_filepath, out_filepath)
