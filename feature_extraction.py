@@ -3,6 +3,21 @@ import librosa
 
 DB_RANGE = 80.0
 
+def get_wav_features(filepath,verbose=False):
+    if verbose:
+        print('Extracing MelSpec')
+    melspec,mel_sr =  wav_to_melspec(filepath)
+    if verbose:
+        print('Extracing mfcc')
+    mfcc,mfcc_sr = wav_to_mfcc(filepath)
+    if verbose:
+        print('Extracing cq')
+    cq,cq_sr = wav_to_cq(filepath)
+    out = ( melspec , mfcc, cq)
+    return out
+
+
+
 def wav_to_melspec(filepath, n_mels=128, min_freq=27.5 ,max_freq=20000):
     audio_data, sample_rate = librosa.load(filepath)
     S = librosa.feature.melspectrogram(y=audio_data, sr=sample_rate, n_mels=n_mels, fmax=max_freq)

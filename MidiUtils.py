@@ -27,22 +27,24 @@ DEFAULT_TICKS_PER_BEAT = 480 # 4
 NOTE_32 = 1/32
 NOTE_16 = 1/16
 NOTES_8 = 1/8
-MIDI_NOTES = 87 # Starting from A0 to C8
+MIDI_NOTES = 88 # Starting from A0 to C8
 MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
 # The default tempo is 120 BPM.
 # (500000 microseconds per beat (quarter note).)
 
-def get_midi_files(directory_path,max_elements = sys.maxsize):
+def get_midi_files(directory_path,max_elements = sys.maxsize,verbose = False):
     files = dict()
     if os.path.exists(directory_path):
         for i, file in enumerate( glob.glob(directory_path + r'\*mid*') ):
-            print(i)
+            if verbose:
+                print('processing file',file)
             f = os.path.basename(file)
             mid = load_midi(file)     
-            files[f] = split_midi(mid)
-            if i > sys.maxsize:
+            files[f] = split_midi(mid,verbose=verbose)
+            if i > max_elements:
                 break
     return files
+
 
 def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
     # The default tempo is 120 BPM.
@@ -57,16 +59,21 @@ def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
         step = 0
         t0 = time.time()
         for message in mid.play(meta_messages=False):
-            if message.is_meta \
-            or message.type =='control_change' \
-            or message.type =='program_change':
-                continue
-            print("step " + str(step) + " "  + str(message))
-            output.send(message)
-            step += 1
+            try:
+                print("step " + str(step) , message.type, str(message))
+                if message.is_meta \
+                or message.type =='control_change' \
+                or message.type =='program_change' \
+                or message.type == 'sysex':
+                    continue
+                
+                output.send(message)
+                step += 1
 
-            if step > max_steps:
-                break
+                if step > max_steps:
+                    break
+            except:
+                print(message.type)
         print('play time: {:.2f} s (expected {:.2f})'.format(time.time() - t0, mid.length))
 
 
@@ -81,29 +88,31 @@ def load_midi(file_path, chunks_per_second=1):
 
 
 def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16,verbose = False):
-    note_events = ['note_on','note_off']
+    note_events = ['note_on','note_off','set_tempo']
     notes = np.zeros(MIDI_NOTES,dtype=int)
     time_notes = []
     note_step = 0
     delta_time = 0
     for message in mid:
-        if message.is_meta \
-        or message.type =='control_change' \
-        or message.type =='program_change':
+        if message.type  not in note_events:
             continue
         if verbose:
             print(f'step {note_step} {message}')
-        note_idx   = message.note - MIDI_OFFSET
+        
+        
         delta_time += message.time
-
         while delta_time > note_factor :
             #note_val = ''.join([str(x) for x in np.copy(notes).tolist()])
             note_val = notes.tolist()
             time_notes.append((round(note_factor,4), note_val))
             delta_time -= note_factor
-        if message.type in note_events:
-            notes[note_idx ] = 1 if message.type == 'note_on' and message.velocity >  0 else 0
-        if note_step > max_steps:
+        
+        if 'note' in message.type:
+            note_idx = message.note - MIDI_OFFSET
+            if note_idx  >= 0  and  note_idx < MIDI_NOTES:
+                notes[note_idx ] = 1 if message.type == 'note_on' and message.velocity >  0 else 0
+        
+        if note_step > max_steps: # Break the loop and exit
             break
         note_step +=1
     while delta_time > 0 :
@@ -177,5 +186,5 @@ from midi2audio import FluidSynth
 MIDI_SOUND_FONT = "Soundfont/198_Yamaha_SY1_piano.sf2"
 
 def midi2wave(midi_filepath, out_filepath, sound_font=MIDI_SOUND_FONT, sample_rate=44100):
-    fs = FluidSynth(sound_font=MIDI_SOUND_FONT, sample_rate=sample_rate)
+    fs = FluidSynth(sound_font=sound_font, sample_rate=sample_rate)
     fs.midi_to_audio(midi_filepath, out_filepath)
