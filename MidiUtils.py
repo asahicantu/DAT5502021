@@ -27,6 +27,7 @@ import librosa
 import mido
 import time
 from mido import MidiFile
+from mido import MidiTrack
 from mido.messages.messages import Message
 from mido import midifiles
 import sys
@@ -139,26 +140,29 @@ def get_mid_tempo(mid,track_idx=0):
             final_tempo = msg.tempo
     return final_tempo
 
-def recreate_mid_track(mid,mid_msgs,track_idx = 0):
-    cut_messages = 0
-    for i, msg in enumerate(mid.tracks[track_idx]):
-        if 'note' in msg.type :
-            cut_messages = i
-            break
-    mid.tracks[track_idx] = list(mid.tracks[track_idx][:cut_messages]) + mid_msgs
-            
+def recreate_mid(mid_msgs):
+    mid = MidiFile()
+    track = MidiTrack()
+    mid.tracks.append(track)
+    for msg in mid_msgs:
+        track.append(msg)
+    return mid
+#%%            
 
 #mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
-mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
-tempo = get_mid_tempo(mid,trac_idx = 0)
+#mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
 #mid = load_midi(r"TestData\\sample.mid")     
+mid = load_midi(r"..\data\archive\data\anime\Suiheisen.mid")     
+
+tempo = get_mid_tempo(mid,track_idx = 0)
 #play_midi(mid)
 vec = split_midi(mid)
 msgs = mid_msgs = vec_to_mid(vec,tempo = tempo)
-recreate_mid_track(mid,msgs,1)
+mid = recreate_mid(msgs)
 # for v in vec:
 #     print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
 #for 
+#mid.print_tracks()
 play_midi(mid)
 mid.print_tracks()
 
