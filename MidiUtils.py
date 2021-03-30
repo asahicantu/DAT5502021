@@ -1,14 +1,4 @@
 #%%
-import os
-
-data_path = os.path.join('..','data','split_midi') 
-mid_file = str(os.path.join(data_path,'song1._7.mid'))
-MIDI_SOUND_FONT = 'C:\\development\\repos\\Uni\\dat550-2021\\DeepWhiners\\198_Yamaha_SY1_piano.sf2'
-MIDI_SOUND_FONT = 'C:\\MIDI\\SoundFonts\\MuseScore_General.sf2'
-# The default tempo is 120 BPM.
-# (500000 microseconds per beat (quarter note).)
-DEFAULT_TEMPO = 500000
-DEFAULT_TICKS_PER_BEAT = 480
  # Tempo is given in microseconds per beat (default 500000).
     # At this tempo there are (500000 / 1000000) == 0.5 seconds
     # per beat. At the default resolution of 480 ticks per beat
@@ -17,10 +7,6 @@ DEFAULT_TICKS_PER_BEAT = 480
     #    (500000 / 1000000) / 480 == 0.5 / 480 == 0.0010417
     #
     #return (tempo / 1000000.0) / ticks_per_beat
-#%%
-a = 0
-
-#%%
 
 import os
 import librosa
@@ -32,6 +18,8 @@ from mido.messages.messages import Message
 from mido import midifiles
 import sys
 import numpy as np
+import glob
+
 #https://mido.readthedocs.io/en/latest/midi_files.html
 
 DEFAULT_TEMPO = 500000 # BITS PER SECOND = 0.5 SECONDS PER BEAT
@@ -43,6 +31,18 @@ MIDI_NOTES = 87 # Starting from A0 to C8
 MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
 # The default tempo is 120 BPM.
 # (500000 microseconds per beat (quarter note).)
+
+def get_midi_files(directory_path,max_elements = sys.maxsize):
+    files = dict()
+    if os.path.exists(directory_path):
+        for i, file in enumerate( glob.glob(directory_path + r'\*mid*') ):
+            print(i)
+            f = os.path.basename(file)
+            mid = load_midi(file)     
+            files[f] = split_midi(mid)
+            if i > sys.maxsize:
+                break
+    return files
 
 def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
     # The default tempo is 120 BPM.
@@ -80,7 +80,7 @@ def load_midi(file_path, chunks_per_second=1):
     return None
 
 
-def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16):
+def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16,verbose = False):
     note_events = ['note_on','note_off']
     notes = np.zeros(MIDI_NOTES,dtype=int)
     time_notes = []
@@ -91,7 +91,8 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
         or message.type =='control_change' \
         or message.type =='program_change':
             continue
-        print(f'step {note_step} {message}')
+        if verbose:
+            print(f'step {note_step} {message}')
         note_idx   = message.note - MIDI_OFFSET
         delta_time += message.time
 
