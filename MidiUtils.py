@@ -33,10 +33,12 @@ import sys
 import numpy as np
 #https://mido.readthedocs.io/en/latest/midi_files.html
 
-DEFAULT_TEMPO = 500000
-DEFAULT_TICKS_PER_BEAT = 480
+DEFAULT_TEMPO = 500000 # BITS PER SECOND = 0.5 SECONDS PER BEAT
+DEFAULT_TICKS_PER_BEAT = 480 # 4
 NOTE_32 = 1/32
 NOTE_16 = 1/16
+MIDI_NOTES = 87 # Starting from A0 to C8
+MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
 # The default tempo is 120 BPM.
 # (500000 microseconds per beat (quarter note).)
 
@@ -76,12 +78,7 @@ def load_midi(file_path, chunks_per_second=1):
     return None
 
 
-
-
 def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16):
-    MIDI_NOTES = 87 # Starting from A0 to C8
-    MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match properly
-    note_factor = NOTE_32
     note_events = ['note_on','note_off']
     notes = np.zeros(MIDI_NOTES,dtype=int)
     time_notes = []
@@ -97,58 +94,73 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
         delta_time += message.time
 
         while delta_time > note_factor :
-            note_val = ''.join([str(x) for x in notes.tolist()])
+            #note_val = ''.join([str(x) for x in np.copy(notes).tolist()])
+            note_val = notes.tolist()
             time_notes.append((round(note_factor,4), note_val))
             delta_time -= note_factor
-        #note_val = ''.join([str(x) for x in np.zeros(MIDI_NOTES,dtype=int).tolist()])
-        
-        if delta_time / note_factor > 1:
-            delta_time -= note_factor
-            note_val = ''.join([str(x) for x in np.copy(notes).tolist()])
-            time_notes.append( (round(note_factor,4), note_val) )
-            notes = np.array(notes,copy = True)
         if message.type in note_events:
             notes[note_idx ] = 1 if message.type == 'note_on' and message.velocity >  0 else 0
         if note_step > max_steps:
             break
-        # if message.time > 0:
-        #     note_val = ''.join([str(x) for x in np.copy(notes).tolist()])
-        #     time_notes.append((round(message.time,4), note_val))
-        #     #notes = np.array(notes,copy = True)
         note_step +=1
     while delta_time > 0 :
-        note_val = ''.join([str(x) for x in notes.tolist()])
-        time_notes.append((round(note_factor,4), note_val))
+        #note_val = ''.join([str(x) for x in notes.tolist()])
+        note_val = notes.tolist()
+        time_notes.append((round(delta_time,4), note_val))
         delta_time -= note_factor
-        #note_val = ''.join([str(x) for x in np.zeros(MIDI_NOTES,dtype=int).tolist()])
-    
     return time_notes
+
+
+
+def vec_to_mid(mid_vector,tempo = DEFAULT_TEMPO, ticks = DEFAULT_TICKS_PER_BEAT):
+    messages = []
+    time_delta = 0
+    note_cache = np.zeros(MIDI_NOTES,dtype=int)
+    time_delta = 0
+    for vec in mid_vector:
+        for i,note in enumerate(vec[1]) :
+            if note_cache[i] != note:
+                note_cache[i] = note
+                message = None
+                time = mido.midifiles.second2tick(time_delta,ticks,tempo)
+                if note == 0:
+                    message = Message(type="note_off",note= MIDI_OFFSET + i,velocity=0,time=  time )
+                if note == 1:
+                    message = Message(type="note_on",note= MIDI_OFFSET + i,velocity=127,time= time)
+                messages.append(message)
+                time_delta = 0
+        time_delta += vec[0]
+    return messages
+
+def get_mid_tempo(mid,track_idx=0):
+    final_tempo = DEFAULT_TEMPO
+    for msg in mid.tracks[track_idx]:
+        if msg.is_meta and msg.type=="set_tempo":
+            final_tempo = msg.tempo
+    return final_tempo
+
+def recreate_mid_track(mid,mid_msgs,track_idx = 0):
+    cut_messages = 0
+    for i, msg in enumerate(mid.tracks[track_idx]):
+        if 'note' in msg.type :
+            cut_messages = i
+            break
+    mid.tracks[track_idx] = list(mid.tracks[track_idx][:cut_messages]) + mid_msgs
+            
+
 #mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
-#mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
-mid = load_midi(r"TestData\\sample.mid")     
+mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
+tempo = get_mid_tempo(mid,trac_idx = 0)
+#mid = load_midi(r"TestData\\sample.mid")     
+#play_midi(mid)
+vec = split_midi(mid)
+msgs = mid_msgs = vec_to_mid(vec,tempo = tempo)
+recreate_mid_track(mid,msgs,1)
+# for v in vec:
+#     print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
+#for 
 play_midi(mid)
-a = split_midi(mid)
-#m_data,mid = play_midi(r"TestData\sample.mid")     
-
-print(len(a))
-a
-#%%
-from MIDI import MIDIFile
-from sys import argv
-
-def parse(file):
-    c=MIDIFile(file)
-    c.parse()
-    print(str(c))
-    for idx, track in enumerate(c):
-        track.parse()
-        print(f'Track {idx}:')
-        print(str(track))
-parse(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
-#%%
-mid.tracks[0][20].time = 1000
-mid.tracks[0][20]
-#%%
+mid.print_tracks()
 
 
 # %%
