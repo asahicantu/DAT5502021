@@ -5,6 +5,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import sounddevice as sd
 import librosa
+#%%
+filename = librosa.ex('trumpet')
+y, sr = librosa.load(filename)
+time = np.arange(0,len(y))/sr
+time[-10:]
 
 # %%
 mpl.rcParams['figure.figsize'] = [12,8]
@@ -40,3 +45,38 @@ img = librosa.display.specshow(S_dB, x_axis='time',
 fig.colorbar(img, ax=ax, format='%+2.0f dB')
 ax.set(title='Mel-frequency spectrogram')
 # %%
+
+# %%
+from Utils import Midi
+from  Utils import Feature
+import importlib
+import glob
+import os
+import numpy as np
+import tqdm
+importlib.reload(Midi)
+importlib.reload(Feature)
+MIDI_SOUND_FONT = 'Soundfont/198_Yamaha_SY1_piano.sf2'
+# This path should point to the used midi dataset
+data_source_path = r"D:\Dev\datasets\midi\anime"
+# This path has to be an existing folder on the disk, otherwise the files will not be created in the following
+out_wav_path = r"D:\Dev\datasets\midi\out"
+# Sample rate in Hz, common CD quality is 44100
+SAMPLE_RATE = 11025
+mid_files_dict = Midi.get_midi_files(data_source_path,max_elements=1, verbose=False)
+features = list()
+keys =  list(mid_files_dict.keys())  # Avoid exception when deleting keys
+for key in tqdm.tqdm(keys):
+    try:
+        in_file = os.path.join(data_source_path, key)
+        out_file = key.replace('.mid', '.wav')
+        out_file = os.path.join(out_wav_path, out_file)
+        Midi.midi2wave(in_file,out_file, sample_rate=SAMPLE_RATE)
+        midi_time = mid_files_dict[key][0]
+        midi_data = mid_files_dict[key][1]
+        feature = Feature.Feature(midi_time, midi_data, out_file)
+        features.append(feature)
+    except (SystemError, FileNotFoundError) as e:
+        ## Ignore files whose feature extraction has failed
+        print(e)    
+f = features[0]

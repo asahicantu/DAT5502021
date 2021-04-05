@@ -19,6 +19,10 @@ from mido import midifiles
 import sys
 import numpy as np
 import glob
+import tqdm
+from midi2audio import FluidSynth
+MIDI_SOUND_FONT = "Soundfont/198_Yamaha_SY1_piano.sf2"
+
 
 #https://mido.readthedocs.io/en/latest/midi_files.html
 
@@ -34,16 +38,20 @@ MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match 
 
 def get_midi_files(directory_path,max_elements = sys.maxsize,verbose = False):
     files = dict()
+    note_factor = NOTE_16
     if os.path.exists(directory_path):
-        for i, file in enumerate( glob.glob(directory_path + r'\*mid*') ):
+        for i, file in tqdm.tqdm(enumerate( glob.glob(directory_path + r'\*mid*') )):
+            if i > max_elements -1:
+                break
             if verbose:
                 print('processing file',file)
             f = os.path.basename(file)
             mid = load_midi(file)     
-            files[f] = split_midi(mid,verbose=verbose)
-            if i > max_elements:
-                break
-    return files
+            midi_split = split_midi(mid,verbose=verbose,note_factor = note_factor)
+            files[f] =  (note_factor, midi_split)
+        return files
+    else :
+        raise SystemError(f"Path {directory_path} does not exist")
 
 
 def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
@@ -54,7 +62,7 @@ def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
     NOTE_32 = 1/32
     NOTE_16 = 1/16
     
-    split_interval = 1/32 # Representing minimum standard duration in musical notation 
+    split_interval = NOTE_32 # Representing minimum standard duration in musical notation 
     with  mido.open_output('Microsoft GS Wavetable Synth 0') as output :
         step = 0
         t0 = time.time()
@@ -99,12 +107,11 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
         if verbose:
             print(f'step {note_step} {message}')
         
-        
         delta_time += message.time
         while delta_time > note_factor :
             #note_val = ''.join([str(x) for x in np.copy(notes).tolist()])
             note_val = notes.tolist()
-            time_notes.append((round(note_factor,4), note_val))
+            time_notes.append(note_val)
             delta_time -= note_factor
         
         if 'note' in message.type:
@@ -118,7 +125,7 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
     while delta_time > 0 :
         #note_val = ''.join([str(x) for x in notes.tolist()])
         note_val = notes.tolist()
-        time_notes.append((round(delta_time,4), note_val))
+        time_notes.append(note_val)
         delta_time -= note_factor
     return time_notes
 
@@ -162,28 +169,11 @@ def recreate_mid(mid_msgs):
 def pretty_print_vector(vec):
     for v in vec:
         print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
-#%%            
-def test():
-    #mid = split_midi(r"..\data\archive\data\undertale\Undertale - Small Shock.mid")     
-    #mid = load_midi(r"..\data\archive\data\undertale\Undertale - Oh My.mid")     
-    #mid = load_midi(r"TestData\\sample.mid")     
-    mid = load_midi(r"..\data\archive\data\anime\Suiheisen.mid")     
-    tempo = get_mid_tempo(mid,track_idx = 0)
-    #play_midi(mid)
-    vec = split_midi(mid)
-    
-    #msgs = mid_msgs = vec_to_mid(vec,tempo = tempo)
-    #mid = recreate_mid(msgs)
-    #for 
-    #mid.print_tracks()
-    #play_midi(mid)
-    #mid.print_tracks()
+
 
 
 # %%
 
-from midi2audio import FluidSynth
-MIDI_SOUND_FONT = "Soundfont/198_Yamaha_SY1_piano.sf2"
 
 def midi2wave(midi_filepath, out_filepath, sound_font=MIDI_SOUND_FONT, sample_rate=44100):
     target_dir = ''.join(os.path.split(midi_filepath)[:-1])
