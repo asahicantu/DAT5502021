@@ -40,10 +40,14 @@ class Feature:
 
     def _parse_audio_sample_to_midi_time(self):
         midi_delta = self.Midi_Time_Step
+        audio_delta =  self.Total_Audio_Time/self.MFCC.shape[1]
         midi_time = []
         midi_2_audio_time = []
-        for time_step_idx, time_step in enumerate(self.Audio_Time):
+        time_step = 0
+        for time_step_idx in range(self.MFCC.shape[1]):
             midi_time.append(time_step_idx)
+            time_step += audio_delta
+            print(time_step, midi_delta )
             if time_step > midi_delta or time_step > self.Total_Midi_time:
                 midi_delta += self.Midi_Time_Step
                 midi_2_audio_time.append(midi_time.copy())
@@ -52,7 +56,7 @@ class Feature:
                     # Time exceeded indication.
                     # At this point MIDI file contains less data in time 
                     # Than normal wave data
-                    #print(f'Time exceeded {time_step_idx} {time_step}, {self.Total_Midi_time}')
+                    print(f'Time exceeded {time_step}, {self.Total_Midi_time}')
                     break
         return midi_2_audio_time
 
@@ -84,7 +88,9 @@ class Feature:
             raise SystemError('Internal Librosa error occurred')
 
 
-    def _wav_to_melspec(audio_data, sample_rate, n_mels=128, min_freq=27.5 ,max_freq=20000):
+    def _wav_to_melspec(audio_data, sample_rate = 16000, n_mels=128, min_freq=27.5 ,max_freq=20000):
+        ##librosa.feature.melspectrogram(y=None, sr=16000, S=None, n_fft=2048, hop_length=512, win_length=None, window='hann', center=True, pad_mode='reflect', power=2.0, **kwargs)
+        ##
         S = librosa.feature.melspectrogram(y=audio_data, sr=sample_rate, n_mels=n_mels, fmax=max_freq)
         S_dB = librosa.power_to_db(S, ref=np.max, top_db=Feature.DB_RANGE)
         return Feature._normalize(S_dB)
