@@ -20,7 +20,7 @@ class Feature:
     DB_RANGE = 80.0
     def __init__(self,midi_time_step, midi_notes, file_path):
         try:
-            self.Sample_rate = 44100
+            self.Sample_rate = 16000
             data = Feature._get_wav_features(file_path, sample_rate=self.Sample_rate, verbose=False)
             self.Name = os.path.split(os.path.splitext(file_path)[0])[-1]
             self.Midi_Notes = midi_notes
@@ -47,7 +47,7 @@ class Feature:
         for time_step_idx in range(self.MFCC.shape[1]):
             midi_time.append(time_step_idx)
             time_step += audio_delta
-            print(time_step, midi_delta )
+            #print(time_step, midi_delta )
             if time_step > midi_delta or time_step > self.Total_Midi_time:
                 midi_delta += self.Midi_Time_Step
                 midi_2_audio_time.append(midi_time.copy())
@@ -56,13 +56,13 @@ class Feature:
                     # Time exceeded indication.
                     # At this point MIDI file contains less data in time 
                     # Than normal wave data
-                    print(f'Time exceeded {time_step}, {self.Total_Midi_time}')
+                    #print(f'Time exceeded {time_step}, {self.Total_Midi_time}')
                     break
         return midi_2_audio_time
 
 
 
-    def _get_wav_features(filepath, sample_rate = 44100, verbose=False):
+    def _get_wav_features(filepath, sample_rate = 16000, verbose=False):
         try:
             audio_data, sample_rate = librosa.load(filepath, sr = sample_rate)
             time = np.arange(0,len(audio_data))/sample_rate
