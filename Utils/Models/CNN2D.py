@@ -4,8 +4,23 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import l2
 import tensorflow as tf
 from tensorflow.python.keras.engine.base_layer import Layer
-def CNN2D(data_shape, N_CLASSES=88):
-    base_layer = layers.Flatten(input_shape=data_shape)
+
+# def CNN2DD():
+#     input_layer = layers.Input(shape=(X.shape[1],))
+#     dense_layer_1 = layers.Dense(15, activation='relu')(input_layer)
+#     dense_layer_2 = layers.Dense(10, activation='relu')(dense_layer_1)
+#     output = layers.Dense(y.shape[1], activation='softmax')(dense_layer_2)
+
+#     model = Model(inputs=input_layer, outputs=output)
+#     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+#     return model
+
+
+
+
+def CNN2D(shape, N_CLASSES):
+    #base_layer = layers.Flatten(input_shape=data_shape)
+    base_layer = layers.Input(shape=shape)
     x = LayerNormalization(axis=2, name='batch_norm')(base_layer)
     x = layers.Conv2D(8, kernel_size=(7,7), activation='tanh', padding='same', name='conv2d_tanh')(x)
     x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_1')(x)
