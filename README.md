@@ -82,7 +82,12 @@ https://www.kaggle.com/asahicantu/dat550-2021-final-project/
    8. Conclusions
 8. Code []
    1. Postprocessing
-      1. Convert Prediction back to midi [MIDI_Notation] [ABC_Notation] [Music_Notation]
+      1. Convert Prediction back to midi [MIDI_Notation] [ABC_Notation] [Music_Notation] [ASAHI]
+   2. Smoothing techniques
+   3. Early stopping [TIM]
+   4. Logistic Regression [Lucas]
+   
+      
 
 
 
