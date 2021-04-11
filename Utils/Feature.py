@@ -18,10 +18,10 @@ All returned spectrogram have a normalized wave amplitude of 0-1 decibels
 #%%
 class Feature:
     DB_RANGE = 80.0
-    def __init__(self,midi_time_step, midi_notes, file_path,verbose=False):
+    def __init__(self,midi_time_step, midi_notes, file_path, sample_rate= 16000, verbose=False):
         try:
             self.VERBOSE = verbose
-            self.Sample_rate = 44100
+            self.Sample_rate = sample_rate
             data = Feature._get_wav_features(file_path, sample_rate=self.Sample_rate, verbose=self.VERBOSE)
             self.Name = os.path.split(os.path.splitext(file_path)[0])[-1]
             self.Midi_Notes = midi_notes
@@ -61,9 +61,9 @@ class Feature:
         return midi_2_audio_time
     
     @staticmethod
-    def _get_wav_features(filepath, sample_rate = 16000, verbose=False):
+    def _get_wav_features(filepath, sample_rate, verbose=False):
         try:
-            sample_rate = 16000
+            sample_rate = sample_rate
             n_mels=40 #128 
             min_freq=27.5 
             max_freq=20000
