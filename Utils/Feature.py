@@ -63,10 +63,10 @@ class Feature:
     def _get_wav_features(filepath, sample_rate, max_freq, verbose=False):
         try:
             sample_rate = sample_rate
-            n_mels=40 #128 
-            min_freq=27.5 
-            n_mfcc=128  # Original was 128
-            n_bins=88
+            n_mels = 40 #128 
+            min_freq = 27.5 
+            n_mfcc = 128  # Original was 128
+            n_bins = 88
 
             audio_data, sample_rate = librosa.load(filepath, sr = sample_rate)
             time = np.arange(0,len(audio_data))/sample_rate

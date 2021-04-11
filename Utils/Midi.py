@@ -40,7 +40,7 @@ def get_midi_files(directory_path,max_elements = sys.maxsize,tempo = 1/16, verbo
     files = dict()
     note_factor = tempo
     if os.path.exists(directory_path):
-        for i, file in tqdm.tqdm(enumerate( glob.glob(directory_path + r'\*mid*') )):
+        for i, file in tqdm.tqdm(enumerate( glob.glob(directory_path + r'\*mid*',recursive=True) )):
             if i > max_elements -1:
                 break
             if verbose:

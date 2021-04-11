@@ -60,7 +60,6 @@ https://www.kaggle.com/asahicantu/dat550-2021-final-project/
 [] Try different preprocessing techniques and find out its differences
 
 
-
 0. Transform Audio MIDI Files into waveforms
 1. Iterate over best features to extract and process
 2. Candidate algorithms to use
@@ -71,6 +70,20 @@ https://www.kaggle.com/asahicantu/dat550-2021-final-project/
    1. Creating them  or get dataset
    2. 
 5. [] Create feature extraction mechanism
-6. [] 
+6. [ ]
+7. Report []
+   1. Summary [TIM]
+   2. Data Preprocessing [Asahi]
+   3. Related work (Existing approaches) [Lucas]
+   4. CNN [Asahi]
+   5. LSTM
+   6. FEED FORWARD
+   7. Logistic Regression [] [Lucas]
+   8. Conclusions
+8. Code []
+   1. Postprocessing
+      1. Convert Prediction back to midi [MIDI_Notation] [ABC_Notation] [Music_Notation]
+
+
 
  
