@@ -21,8 +21,7 @@ class Feature:
     def __init__(self,midi_time_step, midi_notes, file_path, sample_rate= 16000,max_freq=20000, verbose=False):
         try:
             self.VERBOSE = verbose
-            self.Sample_rate = sample_rate
-            data = Feature._get_wav_features(file_path, sample_rate=self.Sample_rate, max_freq=max_freq, verbose=self.VERBOSE)
+            data = Feature._get_wav_features(file_path, sample_rate=sample_rate, max_freq=max_freq, verbose=self.VERBOSE)
             self.Name = os.path.split(os.path.splitext(file_path)[0])[-1]
             self.Midi_Notes = midi_notes
             self.Midi_Time_Step = midi_time_step
@@ -61,7 +60,7 @@ class Feature:
         return midi_2_audio_time
     
     @staticmethod
-    def _get_wav_features(filepath, sample_rate,max_freq, verbose=False):
+    def _get_wav_features(filepath, sample_rate, max_freq, verbose=False):
         try:
             sample_rate = sample_rate
             n_mels=40 #128 
