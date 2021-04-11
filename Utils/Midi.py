@@ -53,7 +53,6 @@ def get_midi_files(directory_path,max_elements = sys.maxsize,verbose = False):
     else :
         raise SystemError(f"Path {directory_path} does not exist")
 
-
 def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
     # The default tempo is 120 BPM.
     # (500000 microseconds per beat (quarter note).)
@@ -84,7 +83,6 @@ def play_midi(mid, max_steps = sys.maxsize,tempo = 500000):
                 print(message.type)
         print('play time: {:.2f} s (expected {:.2f})'.format(time.time() - t0, mid.length))
 
-
 def load_midi(file_path, chunks_per_second=1):
     chunks = dict()
     if os.path.exists(file_path):
@@ -93,7 +91,6 @@ def load_midi(file_path, chunks_per_second=1):
     #print(mid.ticks_per_beat)
     #print(mid.length)
     return None
-
 
 def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16,verbose = False):
     note_events = ['note_on','note_off','set_tempo']
@@ -128,8 +125,6 @@ def split_midi(mid, max_steps = sys.maxsize,tempo = 500000,note_factor = NOTE_16
         time_notes.append(note_val)
         delta_time -= note_factor
     return time_notes
-
-
 
 def vec_to_mid(mid_vector,tempo = DEFAULT_TEMPO, ticks = DEFAULT_TICKS_PER_BEAT):
     messages = []
@@ -170,11 +165,7 @@ def pretty_print_vector(vec):
     for v in vec:
         print(v[0], ''.join([ str(x) for x in v[1] ]),sep='-')
 
-
-
 # %%
-
-
 def midi2wave(midi_filepath, out_filepath, sound_font=MIDI_SOUND_FONT, sample_rate=44100):
     target_dir = ''.join(os.path.split(midi_filepath)[:-1])
     if os.path.exists(target_dir):
