@@ -29,9 +29,9 @@ class Feature:
             self.Audio_data = data[0]
             self.Sample_rate = data[1]
             self.Audio_Time = data[2]
-            self.Total_Audio_Time = self.Audio_Time[-1]
             self.MelSpec = data[3]
             self.MFCC = data[4]
+            self.Total_Audio_Time = self.Audio_Time[-1]
             self.CQ = data[5]
             self.Midi_2_Audio_Time = self._parse_audio_sample_to_midi_time()
         except (SystemError, FileNotFoundError) as e:

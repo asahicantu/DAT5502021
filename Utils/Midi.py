@@ -36,9 +36,9 @@ MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match 
 # The default tempo is 120 BPM.
 # (500000 microseconds per beat (quarter note).)
 
-def get_midi_files(directory_path,max_elements = sys.maxsize,verbose = False):
+def get_midi_files(directory_path,max_elements = sys.maxsize,tempo = 1/16, verbose = False):
     files = dict()
-    note_factor = NOTE_16
+    note_factor = tempo
     if os.path.exists(directory_path):
         for i, file in tqdm.tqdm(enumerate( glob.glob(directory_path + r'\*mid*') )):
             if i > max_elements -1:
