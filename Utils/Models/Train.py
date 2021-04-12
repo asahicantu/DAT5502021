@@ -9,7 +9,6 @@ from Utils.Models.LSTM import LSTM
 from Utils.Models.SBX import SBX
 from Utils.Models.DataContainer import DataContainer
 
-
 def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type):
     models = {'CNN1D':CNN1D,
               'CNN2D':CNN2D,
@@ -32,13 +31,7 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type):
 
     tg = DataContainer(X_train, y_train, n_classes, batch_size=batch_size)
     vg = DataContainer(X_test, y_test, n_classes, batch_size=batch_size)
-
-    X_train = np.array([spec.flatten() for spec in X_train])
-    y_train = np.array(y_train)
-
-    X_test = np.array([spec.flatten() for spec in X_test])
-    y_test = np.array(y_test)
-
+    
     shape =  X_train[0].shape
 
 
@@ -55,4 +48,5 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type):
 
 
     csv_logger = CSVLogger(csv_path, append=False)
-    model.fit(X_train,y_train, validation_data=(X_test,y_test),epochs=30,batch_size = batch_size, verbose=3,callbacks=[csv_logger, cp])
+    print(X_train[0].shape)
+    model.fit(X_train,y_train, validation_data=(X_test,y_test),epochs=30,batch_size = batch_size, verbose=3,callbacks=[cp])
