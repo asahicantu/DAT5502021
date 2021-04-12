@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 '''
 Input predictions and a threshold value for a key to be pressed
@@ -34,3 +35,15 @@ def get_metric(predictions, groud_truth, metric='accuracy'):
         return re.result().numpy()
     else:
         print("unknown metric")
+
+def plot_metric(model, metric):
+    train_metrics = model.history[metric]
+    val_metrics = model.history['val_'+metric]
+    epochs = range(1, len(train_metrics) + 1)
+    plt.plot(epochs, train_metrics)
+    plt.plot(epochs, val_metrics)
+    plt.title('Training and validation '+ metric)
+    plt.xlabel("Epochs")
+    plt.ylabel(metric)
+    plt.legend(["train_"+metric, 'val_'+metric])
+    plt.show()

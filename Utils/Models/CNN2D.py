@@ -1,6 +1,6 @@
 from tensorflow.keras import layers
 from tensorflow.keras.layers import TimeDistributed, LayerNormalization
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model,Sequential
 from tensorflow.keras.regularizers import l2
 import tensorflow as tf
 from tensorflow.python.keras.engine.base_layer import Layer
@@ -19,26 +19,51 @@ from tensorflow.python.keras.engine.base_layer import Layer
 
 
 def CNN2D(shape, N_CLASSES):
-    #base_layer = layers.Flatten(input_shape=data_shape)
+    model = Sequential([
+        layers.experimental.preprocessing.Rescaling(1, input_shape=shape),
+        layers.Conv2D(16, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(32, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(64, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(N_CLASSES)
+    ])
+    model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              
+              metrics=['accuracy'])
+    return model
+
+
     base_layer = layers.Input(shape=shape)
-    x = LayerNormalization(axis=2, name='batch_norm')(base_layer)
-    x = layers.ZeroPadding2D(padding=(2, 2))(x)
-    x = layers.Conv2D(8, kernel_size=(7,7), activation='tanh', padding='same', name='conv2d_tanh')(x)
-    x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_1')(x)
-    x = layers.ZeroPadding2D(padding=(2, 2))(x)
-    x = layers.Conv2D(16, kernel_size=(5,5), activation='relu', padding='same', name='conv2d_relu_1')(x)
-    x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_2')(x)
-    x = layers.Conv2D(16, kernel_size=(3,3), activation='relu', padding='same', name='conv2d_relu_2')(x)
-    x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_3')(x)
-    x = layers.Conv2D(32, kernel_size=(3,3), activation='relu', padding='same', name='conv2d_relu_3')(x)
-    x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_4')(x)
-    x = layers.Conv2D(32, kernel_size=(3,3), activation='relu', padding='same', name='conv2d_relu_4')(x)
-    x = layers.Flatten(name='flatten')(x)
-    x = layers.Dropout(rate=0.2, name='dropout')(x)
-    x = layers.Dense(64, activation='relu', activity_regularizer=l2(0.001), name='dense')(x)
-    o = layers.Dense(N_CLASSES, activation='softmax', name='softmax')(x)
+    x = layers.Conv2D(16, 2, padding='same', activation='relu')(base_layer),
+    x = layers.MaxPooling2D(pool_size=(2,2),padding='same')(x),
+    x = layers.Conv2D(32, 2, padding='same', activation='relu')(x),
+    x = layers.MaxPooling2D()(x),
+    x = layers.Conv2D(64, 2, padding='same', activation='relu')(x),
+    x = layers.MaxPooling2D()(x),
+    x = layers.Flatten()(x),
+    x = layers.Dense(128, activation='relu')(x),
+    o = layers.Dense(N_CLASSES)(x)
+
+    # x = LayerNormalization(axis=2, name='batch_norm')(base_layer)
+    # x = layers.Conv2D(16, kernel_size=(2,2), activation='tanh', padding='same', name='conv2d_tanh')(x)
+    # x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_3')(x)
+    # x = layers.Conv2D(32, kernel_size=(3,3), activation='relu', padding='same', name='conv2d_relu_3')(x)
+    # x = layers.MaxPooling2D(pool_size=(2,2), padding='same', name='max_pool_2d_4')(x)
+    # x = layers.Conv2D(64, kernel_size=(3,3), activation='relu', padding='same', name='conv2d_relu_4')(x)
+    # x = layers.Flatten(name='flatten')(x)
+    # x = layers.Dense(128, activation='relu', activity_regularizer=l2(0.001), name='dense')(x)
+    # o = layers.Dense(N_CLASSES, activation='softmax', name='softmax')(x)
+
     model = Model(inputs=base_layer, outputs=o, name='2d_convolution')
     model.compile(optimizer='adam',
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     return model
+
+
+
