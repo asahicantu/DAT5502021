@@ -3,18 +3,23 @@ import numpy as np
 from tensorflow.keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping
 import tensorflow as tf
 import os
-from Utils.Models.CNN1D import CNN1D
-from Utils.Models.CNN2D import CNN2D
-from Utils.Models.LSTM import LSTM
-from Utils.Models.SBX import SBX
+import Utils.Models.CNN1D as CNN1D
+import Utils.Models.CNN2D as CNN2D
+import Utils.Models.LSTM as LSTM
+import Utils.Models.SBX as SBX
 from Utils.Models.DataContainer import DataContainer
 import matplotlib.pyplot as plt
+import importlib
+importlib.reload(CNN1D)
+importlib.reload(CNN2D)
+importlib.reload(LSTM)
+importlib.reload(SBX)
 
 def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,max_freq,shape):
-    models = {'CNN1D':CNN1D,
-              'CNN2D':CNN2D,
-              'LSTM': LSTM,
-              'SBX': SBX}
+    models = {'CNN1D':CNN1D.CNN1D,
+              'CNN2D':CNN2D.CNN2D,
+              'LSTM': LSTM.LSTM,
+              'SBX': SBX.SBX}
 
     assert model_type in models.keys(), '{} not an available model'.format(model_type)
 
