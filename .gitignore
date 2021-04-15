@@ -3,5 +3,6 @@
 *.wav
 __pycache__
 .ipynb_checkpoints
-Data/Out
+Data
+Data
 fluidsynth

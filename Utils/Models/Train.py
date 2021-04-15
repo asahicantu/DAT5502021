@@ -30,7 +30,7 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,ma
     tc = DataContainer(X_train, y_train,  n_classes, sr, max_freq, batch_size=batch_size)
     vc = DataContainer(X_test, y_test,  n_classes, sr, max_freq, batch_size=batch_size)
 
-    model.fit(X_train,y_train, validation_data=(X_test,y_test),epochs=30,batch_size = batch_size, verbose=3,callbacks=[csv_logger,cp,early_stopping])
+    model.fit(tc, validation_data=(vc),epochs=30,batch_size = batch_size, verbose=3,callbacks=[csv_logger,cp,early_stopping])
     return model
 
 
