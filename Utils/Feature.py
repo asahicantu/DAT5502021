@@ -18,7 +18,7 @@ All returned spectrogram have a normalized wave amplitude of 0-1 decibels
 #%%
 class Feature:
     DB_RANGE = 80.0
-    def __init__(self,midi_time_step, midi_notes, file_path, sample_rate= 16000,max_freq=20000, verbose=False):
+    def __init__(self,midi_time_step, midi_notes, file_path, sample_rate= 16000,max_freq=8500, verbose=False):
         try:
             self.VERBOSE = verbose
             data = Feature._get_wav_features(file_path, sample_rate=sample_rate, max_freq=max_freq, verbose=self.VERBOSE)
@@ -26,13 +26,12 @@ class Feature:
             self.Midi_Notes = midi_notes
             self.Midi_Time_Step = midi_time_step
             self.Total_Midi_time = self.Midi_Time_Step * len(self.Midi_Notes)
-            self.Audio_data = data[0]
-            self.Sample_rate = data[1]
-            self.Audio_Time = data[2]
-            self.MelSpec = data[3]
-            self.MFCC = data[4]
+            self.Sample_rate = data[0]
+            self.Audio_Time = data[1]
+            self.MelSpec = data[2]
+            self.MFCC = data[3]
             self.Total_Audio_Time = self.Audio_Time[-1]
-            self.CQ = data[5]
+            self.CQ = data[4]
             self.Midi_2_Audio_Time = self._parse_audio_sample_to_midi_time()
         except (SystemError, FileNotFoundError) as e:
             raise
@@ -63,10 +62,9 @@ class Feature:
     def _get_wav_features(filepath, sample_rate, max_freq, verbose=False):
         try:
             sample_rate = sample_rate
-            n_mels = 40 #128 
-            min_freq = 27.5 
-            n_mfcc = 128  # Original was 128
-            n_bins = 88
+            n_mels = 200
+            n_mfcc = 200
+            n_bins = 200
 
             audio_data, sample_rate = librosa.load(filepath, sr = sample_rate)
             time = np.arange(0,len(audio_data))/sample_rate
@@ -79,17 +77,18 @@ class Feature:
 
             if verbose:
                 print('Extracing mfcc')
-            mfcc = librosa.feature.mfcc(y=audio_data, sr=sample_rate, n_mfcc=n_mfcc, fmax=max_freq)
+            mfcc = librosa.feature.mfcc(y=audio_data, sr=sample_rate, n_mfcc=n_mfcc)
+            mfcc = librosa.feature.mfcc(y=audio_data, sr=sample_rate, n_mels=n_mfcc, n_mfcc=n_mfcc, fmax=max_freq)
             mfcc = librosa.power_to_db(mfcc, ref=np.max, top_db=Feature.DB_RANGE)
             mfcc =  Feature._normalize(mfcc)
 
             if verbose:
                 print('Extracing cq')
-            cq = librosa.cqt(y=audio_data, sr=sample_rate, fmin=min_freq, n_bins=n_bins)
+            cq = librosa.cqt(y=audio_data, sr=sample_rate, bins_per_octave=12*2, fmin=librosa.note_to_hz('C0'), n_bins=n_bins)
             cq = librosa.amplitude_to_db(np.abs(cq), ref=np.max, top_db=Feature.DB_RANGE)
             cq = Feature._normalize(cq)
 
-            out = (audio_data, sample_rate, time, mel , mfcc, cq)
+            out = (sample_rate, time, mel , mfcc, cq)
             return out
             
         except FileNotFoundError:
