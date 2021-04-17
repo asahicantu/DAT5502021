@@ -14,11 +14,10 @@ Returns an array of 0s and 1s corresponding to the predicted keys
 Threshold should be between 0 and 1
 '''
 def predict_keys(predictions, threshold=0.5):
-    if np.max(predictions) > 1: # slower procedure
-        fn = lambda x: 0.0 if x<threshold else 1.0
-        return tf.convert_to_tensor(list(map(fn, predictions)))
+    if np.max(predictions) > 1: # normalize for faster inference
+        return tf.math.floor((predictions/np.max(predictions)) + 1.0 - (threshold/np.max(predictions)))
     else:        
-        return tf.math.floor(predictions+1.0-threshold) # faster procedure for predictions in [0,1]
+        return tf.math.floor(predictions+1.0-threshold)
         
 '''
 Input predictions and labels
