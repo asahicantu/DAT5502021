@@ -6,6 +6,10 @@ import librosa.display
 from PIL import Image
 import os
 
+def rgb2gray(rgb):
+  return np.dot(rgb[...,:3],[0.2989,0.5870,0.1140])
+
+
 def vec2img(vec,fmax,sr,scale,img_type):
     fig = Figure()
     canvas = FigureCanvas(fig)
