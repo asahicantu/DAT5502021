@@ -2,7 +2,8 @@
 import sys
 import os
 import numpy as np
-from tqdm.notebook import trange, tqdm
+#from tqdm.notebook import trange, tqdm
+from tqdm  import tqdm
 import matplotlib.pyplot as plt
 from Utils import Misc, Pickle, Preprocess, TrainTestValid, Evaluation
 from Utils.Models import Train
@@ -45,7 +46,7 @@ img_path = Misc.get_dir('Data','Out','Img')
                       scale_img = 4,
                       max_images = sys.maxsize,
                       )
-#%%
+
 def runModel(feature,
               x,
               y,
@@ -64,47 +65,50 @@ def runModel(feature,
   #strategy = tf.distribute.MirroredStrategy(devices=['/gpu:0'])
     #with strategy.scope():
   with tf.device('/device:GPU:0'):
-      x_train = tf.convert_to_tensor(X['train'])
-      y_train = tf.convert_to_tensor(Y['train'])
-      x_test = tf.convert_to_tensor(X['test'])
-      y_test = tf.convert_to_tensor(Y['test'])
-      x_valid = X['valid']
-      y_valid = Y['valid']
+    x_train = tf.convert_to_tensor(X['train'])
+    y_train = tf.convert_to_tensor(Y['train'])
+    x_test = tf.convert_to_tensor(X['test'])
+    y_test = tf.convert_to_tensor(Y['test'])
+    x_valid = X['valid']
+    y_valid = Y['valid']
 
-      num_classes = y.shape[1]
-      shape = x_test.shape[1:]
+    num_classes = y.shape[1]
+    shape = x_test.shape[1:]
 
-      model, prediction, cm = Train.train(
-        feature,
-        X_train,
-        y_train,
-        X_test,
-        y_test,
-        batch_size,
-        num_classes,
-        'ALEXNET',
-        shape)
-      return model, prediction, cm = 
+    model = Train.train(
+      feature,
+      x_train,
+      y_train,
+      x_test,
+      y_test,
+      batch_size,
+      epochs,
+      num_classes,
+      'ALEXNET',
+      shape)
+
+    prediction = model(x_valid)
+    cm = Evaluation.get_confusion_matrix(prediction, y_valid)
+    return model, prediction, cm
     
-
 #%%
 models = dict()
 cms = dict()
 predictions = dict()
 for key in features_img_out.keys():
   x = features_img_out[key]
-  model, prediction, cm = runModel(key, x,y,batch_size=32)  
+  model, prediction, cm = runModel(key, x,y,batch_size=32) 
   models[key] = model
   predictions[key] = prediction
   cms[key] = cm
+  #%%
+  # print(cm)
+  #   Evaluation.plot_roc_curve(predictions, y_valid)
+  #   Train.plot_metric(model.history, 'loss')
+  #   Train.plot_metric(model.history, 'acc')
+  # #%%
 #%%
-
-print(cm)
-  Evaluation.plot_roc_curve(predictions, y_valid)
-  Train.plot_metric(model.history, 'loss')
-  Train.plot_metric(model.history, 'acc')
-#%%
-
-
+if __name__ == 'main':
+  main()
 
 

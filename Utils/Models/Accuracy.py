@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.backends import backend
+from tensorflow.keras import backend
 from tensorflow.keras.callbacks import Callback
 class AccuracyHistory(Callback):
     def on_train_begin(self, logs={}):

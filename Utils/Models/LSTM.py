@@ -7,7 +7,7 @@ import os
 
 from tensorflow.python.keras.engine import base_layer
 
-def LSTM(shape, N_CLASSES=88):
+def LSTM(feature,shape, N_CLASSES=88):
     base_layer = layers.Flatten(input_shape=shape,name="Base Layer")
     x = LayerNormalization(axis=2, name='batch_norm')(i.output)
     x = TimeDistributed(layers.Reshape((-1,)), name='reshape')(x)
@@ -25,7 +25,7 @@ def LSTM(shape, N_CLASSES=88):
                          activity_regularizer=l2(0.001),
                          name='dense_3_relu')(x)
     o = layers.Dense(N_CLASSES, activation='softmax', name='softmax')(x)
-    model = Model(inputs=i.input, outputs=o, name='long_short_term_memory')
+    model = Model(inputs=i.input, outputs=o, name=f'{feature}_long_short_term_memory')
     model.compile(optimizer='adam',
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
