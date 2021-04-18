@@ -50,7 +50,7 @@ img_path = Misc.get_dir('Data','Out','Img')
 def runModel(feature,
               x,
               y,
-              batch_size=64,
+              batch_size=16,
               epochs=100):
   x = x.astype('float64') / 255    
   y = y.astype('float64')    
@@ -71,24 +71,29 @@ def runModel(feature,
     y_test = tf.convert_to_tensor(Y['test'])
     x_valid = X['valid']
     y_valid = Y['valid']
-
+    
+    model_types = Train.CNN_MODELS
     num_classes = y.shape[1]
     shape = x_test.shape[1:]
-
-    model = Train.train(
-      feature,
-      x_train,
-      y_train,
-      x_test,
-      y_test,
-      batch_size,
-      epochs,
-      num_classes,
-      'CNN2D',
-      shape)
-
+    
+    for model_type in model_types:
+      model = Train.train(
+        feature,
+        x_train,
+        y_train,
+        x_test,
+        y_test,
+        batch_size,
+        epochs,
+        num_classes,
+        model_type,
+        shape)
     prediction = model(x_valid)
-    cm = Evaluation.get_confusion_matrix(prediction, y_valid)
+    cm = None
+    try:
+      cm =Evaluation.get_confusion_matrix(prediction, y_valid)
+    except:
+      print('Failed to generate confusion matrix')
     return model, prediction, cm
     
 #%%
@@ -97,7 +102,7 @@ cms = dict()
 predictions = dict()
 for key in features_img_out.keys():
   x = features_img_out[key]
-  model, prediction, cm = runModel(key, x,y,batch_size=16) 
+  model, prediction, cm = runModel(key, x,y,batch_size=8) 
   models[key] = model
   predictions[key] = prediction
   cms[key] = cm
