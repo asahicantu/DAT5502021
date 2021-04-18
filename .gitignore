@@ -1,9 +1,9 @@
-*.mid
 *.log
 *.wav
+*.pkl
 __pycache__
 .ipynb_checkpoints/*
-Data
+Data/Out*
 fluidsynth
 logs
 .vscode
