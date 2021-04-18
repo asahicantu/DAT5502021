@@ -7,7 +7,6 @@ import Utils.Models.CNN1D as CNN1D
 import Utils.Models.CNN2D as CNN2D
 import Utils.Models.LSTM as LSTM
 import Utils.Models.SBX as SBX
-import Utils.Models.MLP as MLP
 from Utils.Models.DataContainer import DataContainer
 import matplotlib.pyplot as plt
 import importlib
@@ -15,30 +14,24 @@ importlib.reload(CNN1D)
 importlib.reload(CNN2D)
 importlib.reload(LSTM)
 importlib.reload(SBX)
-importlib.reload(MLP)
 
-def train(X_train, y_train, X_test, y_test, batch_size, n_classes, model_type, sr, max_freq, shape, early_stop_after=3):
+def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,max_freq,shape):
     models = {'CNN1D':CNN1D.CNN1D,
               'CNN2D':CNN2D.CNN2D,
               'LSTM': LSTM.LSTM,
-              'SBX': SBX.SBX,
-              'MLP':MLP.MLP}
+              'SBX': SBX.SBX}
 
     assert model_type in models.keys(), '{} not an available model'.format(model_type)
 
-    model = models[model_type](shape,n_classes)
+    model = models[model_type](shape, n_classes)
     cp = ModelCheckpoint('models/{}.h5'.format(model_type), monitor='val_loss',
                          save_best_only=True, save_weights_only=False,
                          mode='auto', save_freq='epoch', verbose=3)
     csv_path = os.path.join('Data','Out','Log', '{}_log.csv'.format(model_type))
-    early_stopping = EarlyStopping(patience=early_stop_after, monitor='val_loss')
+    early_stopping = EarlyStopping()
     csv_logger = CSVLogger(csv_path, append=False)
 
-
-    tc = DataContainer(X_train, y_train,  n_classes, sr, max_freq, batch_size=batch_size)
-    vc = DataContainer(X_test, y_test,  n_classes, sr, max_freq, batch_size=batch_size)
-
-    model.fit(tc, validation_data=(vc),epochs=200,batch_size = batch_size, verbose=3,callbacks=[csv_logger,cp,early_stopping])
+    model.fit( X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size = batch_size, verbose=3,callbacks=[ csv_logger, cp, early_stopping])
     return model
 
 
