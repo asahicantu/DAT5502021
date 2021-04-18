@@ -39,5 +39,7 @@ def train(feature,X_train, y_train, X_test, y_test,batch_size,epochs,n_classes,m
             verbose=1,
             validation_data=(X_test, y_test),
             callbacks=callbacks)
-    return model
+
+
+    return model, prediction, cm
 

@@ -54,7 +54,7 @@ def CNN2D(feature, shape,n_classes):
 
 def ALEXNET(feature,shape,n_classes):
     model = Sequential(name = f'{feature}_ALEXNET')
-    model.add( Conv2D(filters=96, kernel_size=(11,11), strides=(4,4), activation='relu', input_shape=shape))
+    model.add( Conv2D(filters=96, kernel_size=(3,3), strides=(4,4), activation='relu', input_shape=shape))
     model.add( BatchNormalization())
     model.add( MaxPool2D(pool_size=(3,3), strides=(2,2)))
     model.add( Conv2D(filters=256, kernel_size=(5,5), strides=(1,1), activation='relu', padding="same"))
