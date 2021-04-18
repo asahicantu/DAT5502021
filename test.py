@@ -108,7 +108,7 @@ for key in features_img_out.keys():
   cms[key] = cm
   #%%
   # print(cm)
-  #   Evaluation.plot_roc_curve(predict`ions, y_valid)
+  #   Evaluation.plot_roc_curve(predictions, y_valid)
   #   Train.plot_metric(model.history, 'loss')
   #   Train.plot_metric(model.history, 'acc')
   # #%%
