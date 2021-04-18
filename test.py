@@ -43,7 +43,7 @@ img_path = Misc.get_dir('Data','Out','Img')
                       tempo = 1/8,
                       sample_rate = 16000, # Sample rate in Hz, common CD quality is 44100
                       img_num_save= 1000,
-                      scale_img = 4,
+                      scale_img = 5,
                       max_images = sys.maxsize,
                       )
 
@@ -84,7 +84,7 @@ def runModel(feature,
       batch_size,
       epochs,
       num_classes,
-      'ALEXNET',
+      'CNN2D',
       shape)
 
     prediction = model(x_valid)
@@ -97,13 +97,13 @@ cms = dict()
 predictions = dict()
 for key in features_img_out.keys():
   x = features_img_out[key]
-  model, prediction, cm = runModel(key, x,y,batch_size=32) 
+  model, prediction, cm = runModel(key, x,y,batch_size=16) 
   models[key] = model
   predictions[key] = prediction
   cms[key] = cm
   #%%
   # print(cm)
-  #   Evaluation.plot_roc_curve(predictions, y_valid)
+  #   Evaluation.plot_roc_curve(predict`ions, y_valid)
   #   Train.plot_metric(model.history, 'loss')
   #   Train.plot_metric(model.history, 'acc')
   # #%%
