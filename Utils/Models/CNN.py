@@ -7,7 +7,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.python.keras.engine.base_layer import Layer
 from keras.layers import Input, Flatten,Conv2D,Dense, MaxPool2D,Dropout,MaxPooling2D
 from keras.models import Model
-
+from .Accuracy import AccuracyHistory, root_mse,r2_coeff_determination
 def CNN1D(feature, shape,n_classes=88):
     base_layer = layers.Input(shape=shape,name='Input_Layer')
     x = LayerNormalization(axis=2, name='batch_norm')(base_layer)
@@ -32,7 +32,7 @@ def CNN1D(feature, shape,n_classes=88):
 
 def CNN2D(feature, shape,n_classes):
     """ Creates a model"""
-    model =  tf.keras.Sequential(name = feature)
+    model =  Sequential(name = feature)
     model.add(Conv2D(filters=2, kernel_size=(1, 2), strides=(1),    padding='same', activation='relu', input_shape=shape))
     model.add(Conv2D(filters=2, kernel_size=(7, 1), strides=(1),    padding='same', activation='relu'))
     model.add(Conv2D(filters=3, kernel_size=(1, 2), strides=(1),    padding='same', activation='relu'))
@@ -45,28 +45,27 @@ def CNN2D(feature, shape,n_classes):
     model.add(Conv2D(filters=6, kernel_size=(1, 2), strides=(1),    padding='same', activation='relu'))
     model.add(Flatten())
     model.add(Dense(n_classes, activation='softmax'))
-    model.summary()
-    adam = optimizers.Adam(lr=0.0001, decay=.00001)
+    adam = optimizers.Adam(learning_rate=0.0001, decay=.00001)
     model.compile(loss=root_mse,
                   optimizer=adam,
-                  metrics=[root_mse, 'mae', r2_coeff_determination])
+                  metrics=[root_mse, 'mae',r2_coeff_determination])
     return model
 
 def ALEXNET(feature,shape,n_classes):
     model = Sequential(name = f'{feature}_ALEXNET')
-    model.add( Conv2D(filters=96, kernel_size=(3,3), strides=(4,4), activation='relu', input_shape=shape))
+    model.add( Conv2D(filters=96, kernel_size=(2,2), strides=(2,2), activation='relu', input_shape=shape))
     model.add( BatchNormalization())
-    model.add( MaxPool2D(pool_size=(3,3), strides=(2,2)))
+    model.add( MaxPooling2D(pool_size=(3,3), strides=(2,2)))
     model.add( Conv2D(filters=256, kernel_size=(5,5), strides=(1,1), activation='relu', padding="same"))
     model.add( BatchNormalization())
-    model.add( MaxPool2D(pool_size=(3,3), strides=(2,2)))
+    model.add( MaxPooling2D(pool_size=(3,3), strides=(2,2)))
     model.add( Conv2D(filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"))
     model.add( BatchNormalization())
     model.add( Conv2D(filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"))
     model.add( BatchNormalization())
     model.add( Conv2D(filters=256, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"))
     model.add( BatchNormalization())
-    model.add( MaxPool2D(pool_size=(3,3), strides=(2,2)))
+    model.add( MaxPooling2D(pool_size=(3,3), strides=(2,2)))
     model.add( Flatten())
     model.add( Dense(4096, activation='relu'))
     model.add( Dropout(0.5))
@@ -74,7 +73,7 @@ def ALEXNET(feature,shape,n_classes):
     model.add( Dropout(0.5))
     model.add( Dense(n_classes, activation='sigmoid'))
     model.compile(loss=keras.losses.binary_crossentropy,
-            optimizer=keras.optimizers.Adam(lr=.0001, decay=1e-6),
+            optimizer=keras.optimizers.Adam(learning_rate=.0001, decay=1e-6),
             metrics=['accuracy'])
     return model
     
@@ -93,10 +92,10 @@ def CNN2D_V2(feature, shape,n_classes):
     #model.add(Flatten())
     model.add(Flatten())
     model.add(Dense(64, activation='sigmoid'))
-    model.add(Dense(num_classes, activation='sigmoid'))
+    model.add(Dense(n_classes, activation='sigmoid'))
 
     model.compile(loss=keras.losses.binary_crossentropy,
-            optimizer=keras.optimizers.Adam(lr=.0001, decay=1e-6),
+            optimizer=keras.optimizers.Adam(learning_rate=.0001, decay=1e-6),
             metrics=['accuracy'])
 
 

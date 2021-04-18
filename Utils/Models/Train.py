@@ -22,7 +22,7 @@ def train(feature,X_train, y_train, X_test, y_test,batch_size,epochs,n_classes,m
 
     model = models[model_type](feature,shape, n_classes)
 
-    model_ckpt = os.path.join('Data','Out','Model',f'{feature}_{model_type}_ckpt.h5')
+    model_ckpt = os.path.join('Data','Out','Model_Checkpoint',f'{feature}_{model_type}_ckpt.h5')
     history =  Utils.Models.Accuracy.AccuracyHistory()
 
     checkpoint = ModelCheckpoint(model_ckpt,monitor='val_loss',verbose=1,save_best_only=True,mode='min')
@@ -31,8 +31,9 @@ def train(feature,X_train, y_train, X_test, y_test,batch_size,epochs,n_classes,m
     csv_path =  Misc.get_dir('Data','Out','Log')
     csv_path = os.path.join(csv_path, f'{feature}_{model_type}_log.csv')
     csv_logger = CSVLogger(csv_path, append=False)
-    callbacks = [history, checkpoint,early_stop,csv_logger]
-
+    callbacks = [checkpoint,early_stop,csv_logger,history]
+    model.summary()
+    print(f'Training with batch size: {batch_size} for {epochs} epochs...')
     model.fit(X_train, y_train,
             batch_size=batch_size,
             epochs=epochs,
@@ -40,6 +41,8 @@ def train(feature,X_train, y_train, X_test, y_test,batch_size,epochs,n_classes,m
             validation_data=(X_test, y_test),
             callbacks=callbacks)
 
-
-    return model, prediction, cm
+    model_path = Misc.get_dir('Data','Out','Model')
+    model_path = os.path.join(model_path, f'{feature}_{model_type}.h5')    
+    model.save(model_path)
+    return model
 
