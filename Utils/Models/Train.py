@@ -23,7 +23,7 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,ma
 
     assert model_type in models.keys(), '{} not an available model'.format(model_type)
 
-    model = models[model_type](shape,n_classes)
+    model = models[model_type](shape, n_classes)
     cp = ModelCheckpoint('models/{}.h5'.format(model_type), monitor='val_loss',
                          save_best_only=True, save_weights_only=False,
                          mode='auto', save_freq='epoch', verbose=3)
@@ -31,11 +31,7 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,ma
     early_stopping = EarlyStopping()
     csv_logger = CSVLogger(csv_path, append=False)
 
-
-    tc = DataContainer(X_train, y_train,  n_classes, sr, max_freq, batch_size=batch_size)
-    vc = DataContainer(X_test, y_test,  n_classes, sr, max_freq, batch_size=batch_size)
-
-    model.fit(X_train,y_train, validation_data=(X_test,y_test),epochs=30,batch_size = batch_size, verbose=3,callbacks=[csv_logger,cp,early_stopping])
+    model.fit( X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size = batch_size, verbose=3,callbacks=[ csv_logger, cp, early_stopping])
     return model
 
 

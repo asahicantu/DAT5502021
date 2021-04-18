@@ -3,5 +3,7 @@
 *.wav
 __pycache__
 .ipynb_checkpoints
-Data/Out
+Data
 fluidsynth
+logs
+.vscode
