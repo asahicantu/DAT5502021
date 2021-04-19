@@ -9,7 +9,7 @@ from tensorflow.python.keras.engine import base_layer
 
 def LSTM(shape, N_CLASSES=88):
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.LSTM(units=100, activation='tanh', return_sequences=True, input_shape = X_train[0].shape))
+    model.add(tf.keras.layers.LSTM(units=100, activation='tanh', return_sequences=True, input_shape = shape))
     model.add(tf.keras.layers.Dropout(rate=0.3))
     model.add(tf.keras.layers.LSTM(units=100, activation='tanh', return_sequences=True))
     model.add(tf.keras.layers.Dropout(rate=0.3))
