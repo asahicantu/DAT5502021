@@ -15,7 +15,7 @@ importlib.reload(CNN2D)
 importlib.reload(LSTM)
 importlib.reload(SBX)
 
-def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,max_freq,shape):
+def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,max_freq,shape, early_stop_after=3):
     models = {'CNN1D':CNN1D.CNN1D,
               'CNN2D':CNN2D.CNN2D,
               'LSTM': LSTM.LSTM,
@@ -28,7 +28,7 @@ def train(X_train, y_train, X_test, y_test,batch_size,n_classes,model_type,sr,ma
                          save_best_only=True, save_weights_only=False,
                          mode='auto', save_freq='epoch', verbose=3)
     csv_path = os.path.join('Data','Out','Log', '{}_log.csv'.format(model_type))
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(patience=early_stop_after, monitor='val_loss')
     csv_logger = CSVLogger(csv_path, append=False)
 
     model.fit( X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size = batch_size, verbose=3,callbacks=[ csv_logger, cp, early_stopping])
