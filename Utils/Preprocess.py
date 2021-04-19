@@ -1,6 +1,7 @@
 import os
 import numpy as np
-from tqdm.notebook import trange, tqdm
+from tqdm  import tqdm
+#from tqdm.notebook import trange, tqdm
 import sys
 import librosa
 import librosa.display
