@@ -46,16 +46,6 @@ def train(feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_class
     model.summary()
     print(f'Training with batch size: {batch_size} for {epochs} epochs...')
     model.fit(X_train, y_train,
-<<<<<<< HEAD
-                batch_size=batch_size,
-                epochs=epochs,
-                verbose=1,
-                validation_data=(X_test, y_test),
-                callbacks=callbacks)
-
-    model_path = os.path.join(
-        'Data', 'Out', 'Model', f'{feature}_{model_type}.h5')
-=======
             batch_size=batch_size,
             epochs=epochs,
             verbose=1,
@@ -64,6 +54,5 @@ def train(feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_class
 
     model_path = Misc.get_dir('Data','Out','Model')
     model_path = os.path.join(model_path, f'{feature}_{model_type}.h5')    
->>>>>>> f92cded7a6f0bef2cabb52e35cbb9aaf36fa314c
     model.save(model_path)
     return model

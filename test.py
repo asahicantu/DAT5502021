@@ -9,7 +9,7 @@ from Utils import Misc, Pickle, Preprocess, TrainTestValid, Evaluation
 from Utils.Models import Train
 import datetime
 import tensorflow as tf
-
+import gc
 
 tf.config.list_physical_devices('GPU')
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
@@ -43,28 +43,29 @@ img_path = Misc.get_dir('Data','Out','Img')
                       tempo = 1/8,
                       sample_rate = 16000, # Sample rate in Hz, common CD quality is 44100
                       img_num_save= 1000,
-                      scale_img = 5,
+                      scale_img = 6,
                       max_images = sys.maxsize,
                       )
+y = y.astype('float64')    
+gc.collect()
 
 def runModel(feature,
               x,
               y,
               batch_size=16,
               epochs=100):
-  x = x.astype('float64') / 255    
-  y = y.astype('float64')    
-  X,Y = TrainTestValid.train_test_validation_split(x,y)
-
   
   log_dir = "logs/fit/" + feature + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
   tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
   tf.debugging.set_log_device_placement(True)
   devices = [x[0] for x in tf.config.experimental.list_logical_devices('GPU')]
-  
-  #strategy = tf.distribute.MirroredStrategy(devices=['/gpu:0'])
-    #with strategy.scope():
-  with tf.device('/device:GPU:0'):
+  X,Y = TrainTestValid.train_test_validation_split(x,y)
+  strategy = tf.distribute.MirroredStrategy(devices=['/gpu:0'])
+  with strategy.scope():
+  #with tf.device(('/device:GPU:1','/device:GPU:1',)):
+    #config = tf.config.set_logical_device_configuration()
+    #gpu_options = tf. .GPUOptions(allow_growth=True)
+    #session = tf.InteractiveSession(config=tf.ConfigProto(gpu_options=gpu_options))
     x_train = tf.convert_to_tensor(X['train'])
     y_train = tf.convert_to_tensor(Y['train'])
     x_test = tf.convert_to_tensor(X['test'])
@@ -72,22 +73,21 @@ def runModel(feature,
     x_valid = X['valid']
     y_valid = Y['valid']
     
-    model_types = Train.CNN_MODELS
+    
     num_classes = y.shape[1]
     shape = x_test.shape[1:]
-    
-    for model_type in model_types:
-      model = Train.train(
-        feature,
-        x_train,
-        y_train,
-        x_test,
-        y_test,
-        batch_size,
-        epochs,
-        num_classes,
-        model_type,
-        shape)
+       
+    model = Train.train(
+      feature,
+      x_train,
+      y_train,
+      x_test,
+      y_test,
+      batch_size,
+      epochs,
+      num_classes,
+      model_type,
+      shape)
     prediction = model(x_valid)
     cm = None
     try:
@@ -97,15 +97,25 @@ def runModel(feature,
     return model, prediction, cm
     
 #%%
-models = dict()
-cms = dict()
-predictions = dict()
+models = {x:dict() for x in features_img_out.keys()}
+cms = {x:dict() for x in features_img_out.keys()}
+predictions = {x:dict() for x in features_img_out.keys()}
+model_types = Train.CNN_MODELS
 for key in features_img_out.keys():
   x = features_img_out[key]
-  model, prediction, cm = runModel(key, x,y,batch_size=8) 
-  models[key] = model
-  predictions[key] = prediction
-  cms[key] = cm
+  x = x.astype('float64') / 255    
+  
+  gc.collect()
+  for model_type in model_types:
+    try:
+      model, prediction, cm = runModel(key, x,y,batch_size=8) 
+      models[key][model_type] = model
+      predictions[key][model_type] = prediction
+      cms[key][model_type] = cm
+      gc.collect()
+    except Exception as e:
+      print(f'Model {key} {model_type} failed at {e}')
+  Pickle.dump_pickle(os.path.join(pickle_path,'fit_models.pkl'),(models,cms,predictions))
   #%%
   # print(cm)
   #   Evaluation.plot_roc_curve(predictions, y_valid)
