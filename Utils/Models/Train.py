@@ -26,13 +26,12 @@ CNN_MODELS = [
 ]
 
 
-def train(feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
+def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
     assert model_type in MODELS.keys(), '{} not an available model'.format(model_type)
 
     model = MODELS[model_type](feature, shape, n_classes)
 
-    model_ckpt = os.path.join(
-        'Data', 'Out', 'Model_Checkpoint', f'{feature}_{model_type}_ckpt.h5')
+    model_ckpt = os.path.join('Data', 'Out', 'Model_Checkpoint', f'{feature}_{model_type}_ckpt.h5')
     history = Utils.Models.Accuracy.AccuracyHistory()
 
     checkpoint = ModelCheckpoint(
@@ -43,7 +42,7 @@ def train(feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_class
     csv_path = Misc.get_dir('Data', 'Out', 'Log')
     csv_path = os.path.join(csv_path, f'{feature}_{model_type}_log.csv')
     csv_logger = CSVLogger(csv_path, append=False)
-    log_dir = Misc.get_dir('logs','fit',f'{feature}_{model_type}')
+    log_dir = Misc.get_dir(log_path,f'{feature}_{model_type}')
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
     callbacks = [checkpoint, early_stop, csv_logger, history,tensorboard_callback]
     model.summary()
