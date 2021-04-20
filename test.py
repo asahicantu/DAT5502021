@@ -108,7 +108,7 @@ def trainFeatures(
           models[key][model_type] = model
           predictions[key][model_type] = prediction
           cms[key][model_type] = cm
-          Pickle.dump_pickle(pic,(model,prediction,cm))
+          Pickle.dump_pickle(pickle_file,(model,prediction,cm))
         gc.collect()
       except Exception as e:
         print(f'Model {key} {model_type} failed at {e}')

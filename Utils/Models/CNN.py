@@ -97,6 +97,7 @@ def CNN2D_V2(feature, shape,n_classes):
     model.compile(loss=keras.losses.binary_crossentropy,
             optimizer=keras.optimizers.Adam(learning_rate=.0001, decay=1e-6),
             metrics=['accuracy'])
+    return model    
 
 
 
