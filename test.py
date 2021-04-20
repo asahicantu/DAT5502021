@@ -11,7 +11,7 @@ import datetime
 import tensorflow as tf
 import gc
 import argparse
-
+import time
 
 def init():
   print('init...')
@@ -136,7 +136,8 @@ def parse_args():
   return parser.parse_args()
 
 
-def main():    
+def main():
+  start = time.time()
   args = parse_args()
   
   init()
@@ -168,6 +169,9 @@ def main():
     args.batch_size,
     args.epochs)
   
+  
+  end = time.time()
+  print(f'Total time: f{end - start}')
     
   #%%
   # print(cm)
