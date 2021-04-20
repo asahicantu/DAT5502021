@@ -1,16 +1,9 @@
-from tensorflow.keras import layers
-from tensorflow.keras.layers import TimeDistributed, LayerNormalization
-from tensorflow.keras.models import Model
-from tensorflow.keras.regularizers import l2
 import tensorflow as tf
-import os
 
-from tensorflow.python.keras.engine import base_layer
 
-def LSTM_TD(shape, N_CLASSES=88):
-    
-    
-    model = tf.keras.Sequential()
+def LSTM_TD(feature, shape, N_CLASSES=88):
+
+    model = tf.keras.Sequential(name = feature)
     model.add(tf.keras.layers.LSTM(units=200, activation='tanh', return_sequences=True, input_shape=shape))
     model.add(tf.keras.layers.Dropout(rate=0.3))
     model.add(tf.keras.layers.LSTM(units=200, activation='tanh', return_sequences=True))

@@ -12,6 +12,8 @@ def merge_sequences(data):
     return np.concatenate(data, axis=0)
 
 def train_test_validation_split(X, y,train_size = 0.6,test_size = 0.2,validation_size = 0.2):
+    X = np.array(X)
+    y = np.array(y)
     X_batched = split_in_sequences(X, length=80)
     y_batched = split_in_sequences(y, length=80)
     
