@@ -15,38 +15,27 @@ import argparse
 
 def init():
   print('init...')
-  os.environ["CUDA_VISIBLE_DEVICES"] = "2"
   tf.config.list_physical_devices('GPU')
 
   gpus = tf.config.list_physical_devices('GPU')
-  if gpus:
-    # Create 2 virtual GPUs with 1GB memory each
-    try:
-      logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-      print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
-      # for gpu in gpus:
-      #     tf.config.experimental.set_virtual_device_configuration(
-      #     gpu,[tf.config.experimental.VirtualDeviceConfiguration()])
-    except RuntimeError as e:
-      # Virtual devices must be set before GPUs have been initialized
-      print(e)
+  os.environ["CUDA_VISIBLE_DEVICES"] = f"{len(gpus)}"
+  logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+  print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
 
   
 def runModel(feature,
               model_type,
+              log_path,
               x,
               y,
               batch_size,
-              epochs):
-  
-  log_dir = "logs/fit/" + feature + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-  tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+              epochs,
+              gpu):
   #tf.debugging.set_log_device_placement(True)
-  devices = [x[0] for x in tf.config.experimental.list_logical_devices('GPU')]
   X,Y = TrainTestValid.train_test_validation_split(x,y)
   #strategy = tf.distribute.MirroredStrategy(["/device:GPU:0", "/device:GPU:1"])
   #with strategy.scope():
-  with tf.device('/device:GPU:1'):
+  with tf.device(f'/device:GPU:{gpu}'):
     #config = tf.config.set_logical_device_configuration()
     #gpu_options = tf. .GPUOptions(allow_growth=True)
     #session = tf.InteractiveSession(config=tf.ConfigProto(gpu_options=gpu_options))
@@ -62,6 +51,7 @@ def runModel(feature,
     shape = x_test.shape[1:]
        
     model = Train.train(
+      log_dir,
       feature,
       x_train,
       y_train,
@@ -85,6 +75,8 @@ def trainFeatures(
   features_img_out,
   y,
   pickle_path,
+  log_path,
+  gpu,
   batch_size,
   epochs
   ):
@@ -104,7 +96,7 @@ def trainFeatures(
           print(f'Pickle file {pickle_file} exists. Skipping...')
         else:
           print(f'Processing model {key}:{model_type}')
-          model, prediction, cm = runModel(key,model_type, x,y,batch_size,epochs) 
+          model, prediction, cm = runModel( key,model_type,log_path, x,y,batch_size,epochs,gpu) 
           models[key][model_type] = model
           predictions[key][model_type] = prediction
           cms[key][model_type] = cm
@@ -122,6 +114,7 @@ def parse_args():
   out_wav_path = Misc.get_dir('Data','Out','Wav')
   pickle_path = Misc.get_dir('Data','Out','Pickle')
   img_path = Misc.get_dir('Data','Out','Img')
+  log_path = Misc.get_dir('Logs','Fit')
 
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('data_source_path', type=str, nargs='?', default=data_source_path, help='MIDI dataset path')
@@ -129,6 +122,7 @@ def parse_args():
   parser.add_argument('out_wav_path', type=str, nargs='?', default=out_wav_path, help ='path where wave files will be saved')
   parser.add_argument('pickle_path', type=str, nargs='?', default=pickle_path, help='directory where pickle data will be saved')
   parser.add_argument('img_path', type=str, nargs='?', default=img_path, help='directory where image data will be stored')
+  parser.add_argument('log_path', type=str, nargs='?', default=log_path, help='directory where log data will be saved during ML trainig')
   parser.add_argument('max_sample_size', type=int, nargs='?', const=sys.maxsize,default=sys.maxsize, help='maximum number of elements to sample')
   parser.add_argument('max_freq', type=int, nargs='?', const=8500,default=8500, help='Maximum frequency to process audio files')
   parser.add_argument('tempo', type=int, nargs='?', const=1/8,default=1/8, help='Tempo at which midi files will be split')
@@ -138,7 +132,7 @@ def parse_args():
   parser.add_argument('img_num_save', type=int, nargs='?', const=1000,default=1000, help='If image path specified, maximum number of images to save when running spectrogram')
   parser.add_argument('batch_size', type=int, nargs='?', const=8, default=32, help='Batch size to run when training the model')
   parser.add_argument('epochs', type=int, nargs='?', const=100,default=100, help='Number of epochs to run when training the model')
-  
+  parser.add_argument('gpu', type=int, nargs='?', const=0,default=0, help='If available the GPU unit to run ML algorithms')
   return parser.parse_args()
 
 
@@ -164,7 +158,15 @@ def main():
   y = y.astype('float64')    
   gc.collect()
 
-  trainFeatures(features, features_img_out, y, args.pickle_path, args.batch_size, args.epochs)
+  trainFeatures(
+    features, 
+    features_img_out, 
+    y,
+    args.pickle_path,
+    args.log_path,
+    args.gpu,
+    args.batch_size,
+    args.epochs)
   
     
   #%%
