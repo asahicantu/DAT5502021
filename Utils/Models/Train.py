@@ -8,6 +8,7 @@ import Utils.Models.LSTM as LSTM
 import Utils.Models.Accuracy
 import matplotlib.pyplot as plt
 import importlib
+import datetime
 
 MODELS = {'CNN1D': CNN.CNN1D,
           'CNN2D': CNN.CNN2D,
@@ -42,7 +43,9 @@ def train(feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_class
     csv_path = Misc.get_dir('Data', 'Out', 'Log')
     csv_path = os.path.join(csv_path, f'{feature}_{model_type}_log.csv')
     csv_logger = CSVLogger(csv_path, append=False)
-    callbacks = [checkpoint, early_stop, csv_logger, history]
+    log_dir = Misc.get_dir('logs','fit',f'{feature}_{model_type}')
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    callbacks = [checkpoint, early_stop, csv_logger, history,tensorboard_callback]
     model.summary()
     print(f'Training with batch size: {batch_size} for {epochs} epochs...')
     model.fit(X_train, y_train,

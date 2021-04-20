@@ -32,7 +32,6 @@ def init():
       print(e)
 
   
-
 def runModel(feature,
               model_type,
               x,
@@ -81,7 +80,7 @@ def runModel(feature,
       print('Failed to generate confusion matrix')
     return model, prediction, cm
 
-def runFeatures(
+def trainFeatures(
   features,
   features_img_out,
   y,
@@ -137,7 +136,7 @@ def parse_args():
   parser.add_argument('scale_img', type=int, nargs='?', const=6, default=6, help='Scale at which processed spectrogram images will be scaled upon Initial size=(432 x 648)')
   parser.add_argument('max_images', type=int, nargs='?', const=sys.maxsize, default=sys.maxsize, help='Maximum number of samples to convert into image spectrograms')
   parser.add_argument('img_num_save', type=int, nargs='?', const=1000,default=1000, help='If image path specified, maximum number of images to save when running spectrogram')
-  parser.add_argument('batch_size', type=int, nargs='?', const=8, default=8, help='Batch size to run when training the model')
+  parser.add_argument('batch_size', type=int, nargs='?', const=8, default=32, help='Batch size to run when training the model')
   parser.add_argument('epochs', type=int, nargs='?', const=100,default=100, help='Number of epochs to run when training the model')
   
   return parser.parse_args()
@@ -165,7 +164,7 @@ def main():
   y = y.astype('float64')    
   gc.collect()
 
-  runFeatures(features, features_img_out, y, args.pickle_path, args.batch_size, args.epochs)
+  trainFeatures(features, features_img_out, y, args.pickle_path, args.batch_size, args.epochs)
   
     
   #%%
