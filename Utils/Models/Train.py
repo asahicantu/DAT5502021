@@ -5,6 +5,8 @@ from tensorflow.keras.callbacks import CSVLogger, ModelCheckpoint, EarlyStopping
 from Utils import Misc
 import Utils.Models.CNN as CNN
 import Utils.Models.LSTM as LSTM
+import Utils.Models.MLP as MLP
+import Utils.Models.LSTM_time_distributed as LSTM_TD
 import Utils.Models.Accuracy
 import matplotlib.pyplot as plt
 import importlib
@@ -15,7 +17,9 @@ MODELS = {'CNN1D': CNN.CNN1D,
           'ALEXNET': CNN.ALEXNET,
           'CNN2D_V2': CNN.CNN2D_V2,
           'CNN2D_CUSTOM': CNN.CNN2D_CUSTOM,
-          'LSTM': LSTM.LSTM
+          'LSTM': LSTM.LSTM,
+          'LSTM_TD': LSTM_TD.LSTM_TD,
+          'MLP': MLP.MLP,
           }
 
 CNN_MODELS = [
