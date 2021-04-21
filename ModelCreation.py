@@ -43,13 +43,11 @@ def runModel(feature,
     y_train = tf.convert_to_tensor(Y['train'])
     x_test = tf.convert_to_tensor(X['test'])
     y_test = tf.convert_to_tensor(Y['test'])
-    x_valid = X['valid']
-    y_valid = Y['valid']
     
-    
+  
     num_classes = y.shape[1]
     shape = x_test.shape[1:]
-       
+        
     model = Train.train(
       log_path,
       feature,
@@ -62,17 +60,11 @@ def runModel(feature,
       num_classes,
       model_type,
       shape)
-    prediction = model(x_valid)
-    cm = None
-    try:
-      cm =Evaluation.get_confusion_matrix(prediction, y_valid)
-    except:
-      print('Failed to generate confusion matrix')
-    return model, prediction, cm
+    return model, X,Y
 
 def trainFeatures(
+  models_types,
   features,
-  features_img_out,
   y,
   pickle_path,
   log_path,
@@ -80,27 +72,21 @@ def trainFeatures(
   batch_size,
   epochs
   ):
-  models = {x:dict() for x in features_img_out.keys()}
-  cms = {x:dict() for x in features_img_out.keys()}
-  predictions = {x:dict() for x in features_img_out.keys()}
-  model_types = Train.CNN_MODELS
-  for key in features_img_out.keys():
-    x = features_img_out[key]
-    x = x.astype('float64') / 255    
-    
+  models = {x:dict() for x in features.keys()}
+  for key in features.keys():
+    x = features[key]
+      
     gc.collect()
-    for model_type in model_types:
+    for model_type in models_types:
       try:
         pickle_file = os.path.join(pickle_path,f'fit_model_{key}_{model_type}.pkl')
         if os.path.exists(pickle_file):
           print(f'Pickle file {pickle_file} exists. Skipping...')
         else:
           print(f'Processing model {key}:{model_type}')
-          model, prediction, cm = runModel( key,model_type,log_path, x,y,batch_size,epochs,gpu) 
+          model,X,Y = runModel( key,model_type,log_path, x,y,batch_size,epochs,gpu) 
           models[key][model_type] = model
-          predictions[key][model_type] = prediction
-          cms[key][model_type] = cm
-          Pickle.dump_pickle(pickle_file,(model,prediction,cm))
+          Pickle.dump_pickle(pickle_file,(model,X,Y))
         gc.collect()
       except Exception as e:
         print(f'Model {key} {model_type} failed at {e}')
@@ -141,8 +127,7 @@ def main():
   args = parse_args()
   
   init()
-
-  (features, features_img_out,y)   = Preprocess.preprocess(
+  (features_1D, features_2D,y)   = Preprocess.preprocess(
                         data_source_path = args.data_source_path,
                         out_wav_path = args.out_wav_path ,
                         img_path = args.img_path,
@@ -157,21 +142,13 @@ def main():
                         )
 
   y = y.astype('float64')    
+  features_2D = {x[0]:x[1].astype('float64')/255 for x in features_2D.items() }
   gc.collect()
-
-  trainFeatures(
-    features, 
-    features_img_out, 
-    y,
-    args.pickle_path,
-    args.log_path,
-    args.gpu,
-    args.batch_size,
-    args.epochs)
-  
-  
-  end = time.time()
-  print(f'Total time: f{end - start}')
+  print('Training models for 1-D Features....')
+  trainFeatures(Train.MODELS_1D,features_1D,y,args.pickle_path,args.log_path,args.gpu,args.batch_size,args.epochs)
+  gc.collect()
+  print('Training models for 2-D Features....')
+  trainFeatures(Train.MODELS_2D,features_2D,y,args.pickle_path,args.log_path,args.gpu,args.batch_size,args.epochs)
     
   #%%
   # print(cm)

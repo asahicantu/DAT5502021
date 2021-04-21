@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -8,7 +9,8 @@ from sklearn.metrics import precision_score
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
 import os
-
+import tqdm
+from Utils.Models import Accuracy
 '''
 Input predictions and a threshold value for a key to be pressed
 Returns an array of 0s and 1s corresponding to the predicted keys
@@ -91,10 +93,20 @@ def plot_label_hist(labels):
     plt.show()
 
 
-def load_models(model_dir, model_type):
+def load_models(model_dir, model_type= None):
+    custom_objects = {
+        'AccuracyHistory':Accuracy.AccuracyHistory,
+        'root_mse':Accuracy.root_mse,
+        'r2_coeff_determination':Accuracy.r2_coeff_determination
+    }
     models = {}
-    for model_file in os.listdir(model_dir):
-        if model_file.find(model_type+'.h5') >= 0:  # check if model has type
-            models[model_file] = tf.keras.models.load_model(model_dir + '/' + model_file)
-
+    model_files = [x for x in os.listdir(model_dir) if x.endswith('.h5')]
+    for model_file in model_files:
+        try:
+            print(f'loading model {model_file}...')
+            if  model_type is None or model_type in  model_file:  # check if model has type
+                models[model_file] = tf.keras.models.load_model(model_dir + '/' + model_file,custom_objects=custom_objects)
+        except Exception as e:
+            print(f'Failed to load model {model_file}, exception message is: {e}')
+            
     return models

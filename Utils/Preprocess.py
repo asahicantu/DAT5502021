@@ -28,12 +28,17 @@ def preprocess(
 
 
     
-
-    features_out = Pickle.load_pickle(os.path.join(pickle_path, 'features.pkl'))
-    y = Pickle.load_pickle(os.path.join(pickle_path, 'labels.pkl')) 
+    features_1D_path = os.path.join(pickle_path, 'features_1D.pkl')
+    features_2D_path = os.path.join(pickle_path, 'features_2D.pkl')
+    labels_path = os.path.join(pickle_path, 'labels.pkl')
+    
+    features_1D = Pickle.load_pickle(features_1D_path)
+    features_2D = Pickle.load_pickle(features_2D_path)
+    
+    y = Pickle.load_pickle(labels_path ) 
 
     features_to_process = ['mel','mfcc','cqt']
-    if features_out is None and y is None:
+    if features_1D is None and y is None:
         print('Pickle data not found, running pre processing...')
     
         mid_files_dict = Midi.get_midi_files(data_source_path,max_elements =max_sample_size, tempo = tempo, verbose=False)
@@ -63,8 +68,8 @@ def preprocess(
                 print(e)
 
         y = []
-        features_out = {x:[] for x in features_to_process }
-        features_img_out = {x:[] for x in features_to_process }
+        features_1D = {x:[] for x in features_to_process }
+        features_2D = {x:[] for x in features_to_process }
 
         max_len = np.max([len(i) for f in features for i in f.Midi_2_Audio_Time])
         for feature in tqdm(features, desc='Feature Merge...'):
@@ -77,25 +82,25 @@ def preprocess(
                     for i in range(max_len-len(timeframe)):
                         t.append(timeframe[-i])
                         for f2p in features_to_process:
-                            features_out[f2p].append(feature.Data[f2p][:,t])
+                            features_1D[f2p].append(feature.Data[f2p][:,t])
                 else:
                     for f2p in features_to_process:
-                        features_out[f2p].append(feature.Data[f2p][:,timeframe])
+                        features_1D[f2p].append(feature.Data[f2p][:,timeframe])
         y = np.array(y)
         
-        Pickle.dump_pickle(os.path.join(pickle_path,'features.pkl') ,features_out)
-        Pickle.dump_pickle(os.path.join(pickle_path,'labels.pkl'),y)
+        Pickle.dump_pickle(features_1D_path ,features_1D)
+        Pickle.dump_pickle(labels_path,y)
 
-    features_img_out = Pickle.load_pickle(os.path.join(pickle_path, 'features_img.pkl'))
-    if features_img_out is None:
-        features_img_out=dict()
+    
+    if features_2D is None:
+        features_2D=dict()
         print('Pickle image data not found, running pre processing...')
         for f2p in tqdm(features_to_process, desc='Vec2Image...'):
-                data = np.array(features_out[f2p])[ : max_images]
+                data = np.array(features_1D[f2p])[ : max_images]
                 print(data.shape)
-                features_img_out[f2p] =  np.array(
+                features_2D[f2p] =  np.array(
                     [ Misc.vec2img(x,max_freq,sample_rate,scale_img,f2p) for x in tqdm(data) ] )
-        Pickle.dump_pickle(os.path.join(pickle_path,'features_img.pkl'),features_img_out)
+        Pickle.dump_pickle(features_2D_path,features_2D)
 
 
     if not img_path is None:
@@ -105,9 +110,9 @@ def preprocess(
 
         if img_num_save > 0:
             for f2p in tqdm(features_to_process,desc='Img Save...'): 
-                data = features_img_out[f2p]
+                data = features_2D[f2p]
                 [Image.fromarray(x).save(os.path.join(img_path, f2p, f"TRAIN_{i}.jpeg")) for i,x in tqdm(enumerate(data[:img_num_save]))]    
-    return (features_out, features_img_out,y)    
+    return (features_1D, features_2D,y)    
 
 
 def main():

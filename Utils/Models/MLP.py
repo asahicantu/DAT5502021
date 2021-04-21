@@ -15,6 +15,9 @@ def MLP_1_hidden(feature, shape, N_CLASSES=88):
     return model
 
 def MLP(feature, shape, N_CLASSES=88):
+    """
+    Multi layer perceptron
+    """
     model = tf.keras.models.Sequential([
     tf.keras.layers.Input(shape=shape),
     tf.keras.layers.Dense(512, activation='relu'),

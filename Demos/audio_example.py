@@ -31,7 +31,7 @@ plt.show()
 import librosa
 import librosa.display
 import numpy as np
-y, sr = librosa.load(librosa.ex('trumpet'))
+y, sr = librosa.load('../Data/In/classical/Bartok_SZ080-02_002_20110315-SMD.mid')
 librosa.feature.melspectrogram(y=y, sr=sr)
 D = np.abs(librosa.stft(y))**2
 S = librosa.feature.melspectrogram(S=D, sr=sr)
@@ -80,3 +80,11 @@ for key in tqdm.tqdm(keys):
         ## Ignore files whose feature extraction has failed
         print(e)    
 f = features[0]
+#%%
+from mido import MidiFile
+from mido import MidiTrack
+from mido.messages.messages import Message
+from mido import midifiles
+from midi2audio import FluidSynth
+MIDI_SOUND_FONT = "../Soundfont/198_Yamaha_SY1_piano.sf2"
+

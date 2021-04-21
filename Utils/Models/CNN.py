@@ -7,7 +7,7 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.python.keras.engine.base_layer import Layer
 from keras.layers import Input, Flatten,Conv2D,Dense, MaxPool2D,Dropout,MaxPooling2D
 from keras.models import Model
-from .Accuracy import AccuracyHistory, root_mse,r2_coeff_determination
+from . Accuracy import AccuracyHistory, root_mse,r2_coeff_determination
 def CNN1D(feature, shape,n_classes=88):
     base_layer = layers.Input(shape=shape,name='Input_Layer')
     x = LayerNormalization(axis=2, name='batch_norm')(base_layer)

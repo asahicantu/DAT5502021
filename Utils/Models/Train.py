@@ -6,8 +6,7 @@ from Utils import Misc
 import Utils.Models.CNN as CNN
 import Utils.Models.LSTM as LSTM
 import Utils.Models.MLP as MLP
-import Utils.Models.LSTM_time_distributed as LSTM_TD
-import Utils.Models.Accuracy
+from Utils.Models import Accuracy
 import matplotlib.pyplot as plt
 import importlib
 import datetime
@@ -18,16 +17,25 @@ MODELS = {'CNN1D': CNN.CNN1D,
           'CNN2D_V2': CNN.CNN2D_V2,
           'CNN2D_CUSTOM': CNN.CNN2D_CUSTOM,
           'LSTM': LSTM.LSTM,
-          'LSTM_TD': LSTM_TD.LSTM_TD,
+          'LSTM_TD': LSTM.LSTM_TD,
           'MLP': MLP.MLP,
           }
 
-CNN_MODELS = [
+MODELS_2D = [
     'CNN2D',
     'ALEXNET',
     'CNN2D_V2',
     'CNN2D_CUSTOM'
 ]
+
+MODELS_1D = [
+    'LSTM',
+    'LSTM_TD',
+    'MLP'
+]
+
+
+
 
 
 def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
@@ -36,7 +44,7 @@ def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs
     model = MODELS[model_type](feature, shape, n_classes)
 
     model_ckpt = os.path.join('Data', 'Out', 'Model_Checkpoint', f'{feature}_{model_type}_ckpt.h5')
-    history = Utils.Models.Accuracy.AccuracyHistory()
+    history = Accuracy.AccuracyHistory()
 
     checkpoint = ModelCheckpoint(
         model_ckpt, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
