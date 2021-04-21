@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
+import os
 
 '''
 Input predictions and a threshold value for a key to be pressed
@@ -42,6 +43,7 @@ def get_metric(predictions, ground_truth, metric='accuracy', threshold=0.5):
     else:
         print("unknown metric")
 
+
 def plot_metric(model, metric):
     train_metrics = model.history[metric]
     val_metrics = model.history['val_'+metric]
@@ -53,7 +55,8 @@ def plot_metric(model, metric):
     plt.ylabel(metric)
     plt.legend(["train_"+metric, 'val_'+metric])
     plt.show()
-    
+
+
 def plot_roc_curve(predictions, ground_truth):
     fpr, tpr, thresholds = roc_curve(tf.reshape(ground_truth,[-1]), tf.reshape(predictions,[-1]))
     plt.plot(fpr, tpr)
@@ -76,6 +79,7 @@ def get_keys(label):
             keys.append(i)
     return keys
 
+
 def plot_label_hist(labels):
     hist = labels[0]
     for i in labels[0:]:
@@ -85,3 +89,12 @@ def plot_label_hist(labels):
     plt.ylabel('Frequency')
     plt.title('Relative Key Frequencies')
     plt.show()
+
+
+def load_models(model_dir, model_type):
+    models = {}
+    for model_file in os.listdir(model_dir):
+        if model_file.find(model_type+'.h5') >= 0:  # check if model has type
+            models[model_file] = tf.keras.models.load_model(model_dir + '/' + model_file)
+
+    return models
