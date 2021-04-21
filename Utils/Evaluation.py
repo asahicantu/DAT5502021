@@ -74,4 +74,14 @@ def get_keys(label):
     for i in range(label.shape[0]):
         if label[i] == 1:
             keys.append(i)
-    return keys 
+    return keys
+
+def plot_label_hist(labels):
+    hist = labels[0]
+    for i in labels[0:]:
+        hist += i
+    plt.hist(range(0, 88), weights=hist/np.sum(hist), bins=88)
+    plt.xlabel('Key')
+    plt.ylabel('Frequency')
+    plt.title('Relative Key Frequencies')
+    plt.show()
