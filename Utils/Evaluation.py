@@ -116,13 +116,14 @@ def load_models(model_dir, model_type= None):
     return models
 
 
-def is_difference_significant(pred_1, pred_2, threshold1, threshold2, labels, alpha=0.05):
+def is_difference_significant(pred_1, pred_2, threshold1, threshold2, labels1, labels2, alpha=0.05):
     """null hypothesis: there no statistically significant difference between the mean accuracy of both classifiers
     at the given significance level (default 5%)"""
     acc_1 = []
     acc_2 = []
-    for idx, label in enumerate(labels):
+    for idx, label in enumerate(labels1):
         acc_1.append(get_metric(pred_1[idx], label, metric='accuracy', threshold=threshold1))
+    for idx, label in enumerate(labels2):
         acc_2.append(get_metric(pred_2[idx], label, metric='accuracy', threshold=threshold2))
 
     stat, p = ttest_rel(acc_1, acc_2)
@@ -199,3 +200,4 @@ def group_labels_LSTM_M2M(label_dict):
     for key in label_dict.keys():
         out[key] = np.array(split_in_sequences(label_dict[key], 10, keep_short_batch=False))
     return out
+
