@@ -1,11 +1,13 @@
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-def split_in_sequences(data, length):
+def split_in_sequences(data, length, keep_short_batch=True):
     out = []
     for i in range(int(np.floor(data.shape[0]/length))):
         out.append(data[i*length:(i+1)*length])
-    out.append(data[int(np.floor(data.shape[0]/length))*length:]) # append last batch (possibly shorter than length)
+
+    if keep_short_batch:
+        out.append(data[int(np.floor(data.shape[0]/length))*length:]) # append last batch (possibly shorter than length)
     return out 
 
 def merge_sequences(data):

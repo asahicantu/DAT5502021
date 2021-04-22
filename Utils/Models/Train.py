@@ -11,14 +11,16 @@ import matplotlib.pyplot as plt
 import importlib
 import datetime
 
+
 MODELS = {'CNN1D': CNN.CNN1D,
           'CNN2D': CNN.CNN2D,
           'ALEXNET': CNN.ALEXNET,
           'CNN2D_V2': CNN.CNN2D_V2,
           'CNN2D_CUSTOM': CNN.CNN2D_CUSTOM,
           'LSTM': LSTM.LSTM,
-          'LSTM_TD': LSTM.LSTM_TD,
+          'LSTM_M2M': LSTM.LSTM_M2M,
           'MLP': MLP.MLP,
+          'MLP_1H': MLP.MLP_1_hidden,
           }
 
 MODELS_2D = [
@@ -30,12 +32,10 @@ MODELS_2D = [
 
 MODELS_1D = [
     'LSTM',
-    'LSTM_TD',
-    'MLP'
+    'LSTM_M2M',
+    'MLP',
+    'MLP_1H'
 ]
-
-
-
 
 
 def train(model_path,log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
