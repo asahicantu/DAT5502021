@@ -13,6 +13,9 @@ import gc
 import argparse
 import time
 
+from Utils.TrainTestValid import split_in_sequences
+
+
 def init():
   print('init...')
   tf.config.list_physical_devices('GPU')
@@ -46,7 +49,20 @@ def runModel(feature,
     y_train = tf.convert_to_tensor(Y['train'])
     x_test = tf.convert_to_tensor(X['test'])
     y_test = tf.convert_to_tensor(Y['test'])
-    
+
+    # proper formatting
+    if model_type == 'LSTM':
+      x_train = tf.transpose(x_train, [0, 2, 1])
+      x_test = tf.transpose(x_test, [0, 2, 1])
+    elif model_type == 'MLP' or model_type == 'MLP_1H' or model_type == 'LSTM_M2M':
+      x_train = np.array([tf.reshape(x, [-1]) for x in x_train])
+      x_test = np.array([tf.reshape(x, [-1]) for x in x_test])
+      if model_type == 'LSTM_M2M':
+        x_train = np.array(split_in_sequences(x_train, 10, keep_short_batch=False))
+        x_test = np.array(split_in_sequences(x_test, 10, keep_short_batch=False))
+        y_train = np.array(split_in_sequences(y_train, 10, keep_short_batch=False))
+        y_test = np.array(split_in_sequences(y_test, 10, keep_short_batch=False))
+    print(x_train.shape, x_test.shape, y_train.shape, y_test.shape)
   
     num_classes = y_test.shape[1]
     shape = x_test.shape[1:]
@@ -80,7 +96,7 @@ def trainFeatures(
   for feature in features.keys():
     x = features[feature]
     X,Y = TrainTestValid.train_test_validation_split(x,y)
-    X_y_file = os.path.join(pickle_path,f'X_Y_{feature}.pkl')  
+    X_y_file = os.path.join(pickle_path,f'X_Y_{feature}.pkl')
     Pickle.dump_pickle(X_y_file,(X,Y))
     gc.collect()
     for model_type in models_types:
