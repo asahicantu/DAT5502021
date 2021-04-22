@@ -93,7 +93,7 @@ def plot_label_hist(labels):
     plt.show()
 
 
-def load_models(model_dir, model_type= None):
+def load_models(model_dir,feature_type = None, model_type= None, ):
     custom_objects = {
         'AccuracyHistory':Accuracy.AccuracyHistory,
         'root_mse':Accuracy.root_mse,
@@ -104,9 +104,33 @@ def load_models(model_dir, model_type= None):
     for model_file in model_files:
         try:
             print(f'loading model {model_file}...')
-            if  model_type is None or model_type in  model_file:  # check if model has type
-                models[model_file] = tf.keras.models.load_model(model_dir + '/' + model_file,custom_objects=custom_objects)
+            if  (model_type is None or model_type in  model_file)  and \
+                (feature_type is None or feature_type in model_file):  # check if model has type
+                model_path = os.path.join(model_dir,model_file)
+                models[model_file] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
         except Exception as e:
             print(f'Failed to load model {model_file}, exception message is: {e}')
             
     return models
+
+
+def load_models(model_dir,feature_type = None, model_type= None, ):
+    custom_objects = {
+        'AccuracyHistory':Accuracy.AccuracyHistory,
+        'root_mse':Accuracy.root_mse,
+        'r2_coeff_determination':Accuracy.r2_coeff_determination
+    }
+    models = {}
+    model_files = [x for x in os.listdir(model_dir) if x.endswith('.h5')]
+    for model_file in model_files:
+        try:
+            print(f'loading model {model_file}...')
+            if  (model_type is None or model_type in  model_file)  and \
+                (feature_type is None or feature_type in model_file):  # check if model has type
+                model_path = os.path.join(model_dir,model_file)
+                models[model_file] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
+        except Exception as e:
+            print(f'Failed to load model {model_file}, exception message is: {e}')
+            
+    return models
+
