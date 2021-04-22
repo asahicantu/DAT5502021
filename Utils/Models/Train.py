@@ -38,7 +38,7 @@ MODELS_1D = [
 
 
 
-def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
+def train(model_path,log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs, n_classes, model_type, shape):
     assert model_type in MODELS.keys(), '{} not an available model'.format(model_type)
 
     model = MODELS[model_type](feature, shape, n_classes)
@@ -51,8 +51,7 @@ def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs
     early_stop = EarlyStopping(
         patience=5, monitor='val_loss', verbose=1, mode='min')
 
-    csv_path = Misc.get_dir('Data', 'Out', 'Log')
-    csv_path = os.path.join(csv_path, f'{feature}_{model_type}_log.csv')
+    csv_path = os.path.join(log_path, f'{feature}_{model_type}_log.csv')
     csv_logger = CSVLogger(csv_path, append=False)
     log_dir = Misc.get_dir(log_path,f'{feature}_{model_type}')
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
@@ -66,7 +65,5 @@ def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs
             validation_data=(X_test, y_test),
             callbacks=callbacks)
 
-    model_path = Misc.get_dir('Data','Out','Model')
-    model_path = os.path.join(model_path, f'{feature}_{model_type}.h5')    
-    model.save(model_path)
+    model.save(os.path.join(model_path, f'{feature}_{model_type}.h5'))
     return model

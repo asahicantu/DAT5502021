@@ -21,18 +21,21 @@ def init():
   os.environ["CUDA_VISIBLE_DEVICES"] = f"{len(gpus)}"
   logical_gpus = tf.config.experimental.list_logical_devices('GPU')
   print(len(gpus), "Physical GPU,", len(logical_gpus), "Logical GPUs")
+  for gpu in gpus:
+    print(gpu)
 
   
 def runModel(feature,
               model_type,
+              model_path,
               log_path,
-              x,
-              y,
+              X,
+              Y,
               batch_size,
               epochs,
               gpu):
   #tf.debugging.set_log_device_placement(True)
-  X,Y = TrainTestValid.train_test_validation_split(x,y)
+  
   #strategy = tf.distribute.MirroredStrategy(["/device:GPU:0", "/device:GPU:1"])
   #with strategy.scope():
   with tf.device(f'/device:GPU:{gpu}'):
@@ -45,10 +48,11 @@ def runModel(feature,
     y_test = tf.convert_to_tensor(Y['test'])
     
   
-    num_classes = y.shape[1]
+    num_classes = y_test.shape[1]
     shape = x_test.shape[1:]
         
     model = Train.train(
+      model_path,
       log_path,
       feature,
       x_train,
@@ -60,36 +64,37 @@ def runModel(feature,
       num_classes,
       model_type,
       shape)
-    return model, X,Y
+    return model
 
 def trainFeatures(
   models_types,
   features,
   y,
   pickle_path,
+  model_path,
   log_path,
   gpu,
   batch_size,
   epochs
   ):
-  models = {x:dict() for x in features.keys()}
-  for key in features.keys():
-    x = features[key]
-      
+  for feature in features.keys():
+    x = features[feature]
+    X,Y = TrainTestValid.train_test_validation_split(x,y)
+    X_y_file = os.path.join(pickle_path,f'X_Y_{feature}.pkl')  
+    Pickle.dump_pickle(X_y_file,(X,Y))
     gc.collect()
     for model_type in models_types:
       try:
-        pickle_file = os.path.join(pickle_path,f'fit_model_{key}_{model_type}.pkl')
-        if os.path.exists(pickle_file):
-          print(f'Pickle file {pickle_file} exists. Skipping...')
+        model_file = os.path.join(model_path, f'{feature}_{model_type}.h5')
+        if os.path.exists(model_file):
+          print(f'Model {model_file} exists. Skipping...')
         else:
-          print(f'Processing model {key}:{model_type}')
-          model,X,Y = runModel( key,model_type,log_path, x,y,batch_size,epochs,gpu) 
-          models[key][model_type] = model
-          Pickle.dump_pickle(pickle_file,(model,X,Y))
+          pass
+        print(f'Processing model {feature}:{model_type}')
+        runModel( feature,model_type,model_path, log_path, X,Y,batch_size,epochs,gpu) 
         gc.collect()
       except Exception as e:
-        print(f'Model {key} {model_type} failed at {e}')
+        print(f'Model {feature} {model_type} failed at {e}')
 
 
 
@@ -101,6 +106,7 @@ def parse_args():
   pickle_path = Misc.get_dir('Data','Out','Pickle')
   img_path = Misc.get_dir('Data','Out','Img')
   log_path = Misc.get_dir('Logs','Fit')
+  model_path = Misc.get_dir('Data','Out','Model')
 
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('data_source_path', type=str, nargs='?', default=data_source_path, help='MIDI dataset path')
@@ -108,6 +114,7 @@ def parse_args():
   parser.add_argument('out_wav_path', type=str, nargs='?', default=out_wav_path, help ='path where wave files will be saved')
   parser.add_argument('pickle_path', type=str, nargs='?', default=pickle_path, help='directory where pickle data will be saved')
   parser.add_argument('img_path', type=str, nargs='?', default=img_path, help='directory where image data will be stored')
+  parser.add_argument('model_path', type=str, nargs='?', default=model_path, help='directory where model data will be saved during ML trainig')
   parser.add_argument('log_path', type=str, nargs='?', default=log_path, help='directory where log data will be saved during ML trainig')
   parser.add_argument('max_sample_size', type=int, nargs='?', const=sys.maxsize,default=sys.maxsize, help='maximum number of elements to sample')
   parser.add_argument('max_freq', type=int, nargs='?', const=8500,default=8500, help='Maximum frequency to process audio files')
@@ -115,8 +122,8 @@ def parse_args():
   parser.add_argument('sample_rate', type=int, nargs='?', const=16000,default=16000, help='Sample rate to process wafe files')
   parser.add_argument('scale_img', type=int, nargs='?', const=6, default=6, help='Scale at which processed spectrogram images will be scaled upon Initial size=(432 x 648)')
   parser.add_argument('max_images', type=int, nargs='?', const=sys.maxsize, default=sys.maxsize, help='Maximum number of samples to convert into image spectrograms')
-  parser.add_argument('img_num_save', type=int, nargs='?', const=1000,default=1000, help='If image path specified, maximum number of images to save when running spectrogram')
-  parser.add_argument('batch_size', type=int, nargs='?', const=8, default=32, help='Batch size to run when training the model')
+  parser.add_argument('img_num_save', type=int, nargs='?', const=0,default=0, help='If image path specified, maximum number of images to save when running spectrogram')
+  parser.add_argument('batch_size', type=int, nargs='?', const=32, default=32, help='Batch size to run when training the model')
   parser.add_argument('epochs', type=int, nargs='?', const=100,default=100, help='Number of epochs to run when training the model')
   parser.add_argument('gpu', type=int, nargs='?', const=0,default=0, help='If available the GPU unit to run ML algorithms')
   return parser.parse_args()
@@ -142,14 +149,16 @@ def main():
                         )
 
   y = y.astype('float64')    
-  features_2D = {x[0]:x[1].astype('float64')/255 for x in features_2D.items() }
+  features_2D = {x[0]:np.array( x[1], dtype = 'float64')/255 for x in features_2D.items() }
   gc.collect()
   print('Training models for 1-D Features....')
-  trainFeatures(Train.MODELS_1D,features_1D,y,args.pickle_path,args.log_path,args.gpu,args.batch_size,args.epochs)
+  trainFeatures(Train.MODELS_1D,features_1D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
   gc.collect()
   print('Training models for 2-D Features....')
-  trainFeatures(Train.MODELS_2D,features_2D,y,args.pickle_path,args.log_path,args.gpu,args.batch_size,args.epochs)
-    
+  trainFeatures(Train.MODELS_2D,features_2D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
+  end = time.time()
+  diff = end - start
+  print(f'PRocess Completed in {diff} seconds')
   #%%
   # print(cm)
   #   Evaluation.plot_roc_curve(predictions, y_valid)
