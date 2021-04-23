@@ -3,8 +3,9 @@
 *.pkl
 __pycache__
 .ipynb_checkpoints/*
-Data/Out/*
-    !Data/Out/Model
+.vscode
 fluidsynth
 logs
-.vscode
+Data/Out/*
+!Data/Out/Model/
+
