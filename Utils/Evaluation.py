@@ -170,7 +170,7 @@ def get_data_dict(model_types, features, labels):
 def format_input_dict(x_dict, model_type):
     """Formats input dictionary according to model type specific properties.
     Assumes that dictionary content is numpy array"""
-    out = {}
+    out = x_dict
     for key in x_dict.keys():
         if model_type == 'LSTM':
             out[key] = x_dict[key].swapaxes(1, 2)

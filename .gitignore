@@ -7,5 +7,5 @@ __pycache__
 fluidsynth
 logs
 Data/Out/*
-!Data/Out/Model/
+!Data/Out/Model/*
 
