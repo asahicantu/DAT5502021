@@ -51,7 +51,7 @@ class Feature:
             raise
 
     def _parse_audio_sample_to_midi_time(self):
-        audio_shape  = self.Data['mel'].shape[1]
+        audio_shape  = self.Data[list(self.Data.keys())[0]].shape[1]
         midi_delta = self.Midi_Time_Step
         audio_delta =  self.Total_Audio_Time/audio_shape
         midi_time = []

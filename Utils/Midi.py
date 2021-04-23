@@ -128,13 +128,13 @@ def vec_to_mid(mid_vector,tempo = DEFAULT_TEMPO, ticks = DEFAULT_TICKS_PER_BEAT)
     messages = []
     time_delta = 0
     note_cache = np.zeros(MIDI_NOTES,dtype=int)
-    time_delta = 0
     for vec in mid_vector:
         for i,note in enumerate(vec[1]) :
             if note_cache[i] != note:
                 note_cache[i] = note
                 message = None
                 time = mido.midifiles.second2tick(time_delta,ticks,tempo)
+                time = int(time)
                 if note == 0:
                     message = Message(type="note_off",note= MIDI_OFFSET + i,velocity=0,time=  time )
                 if note == 1:
