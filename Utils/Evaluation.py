@@ -97,7 +97,7 @@ def plot_label_hist(labels):
     plt.show()
 
 
-def load_models(model_dir,feature_type = None, model_type= None, ):
+def load_models(model_dir,feature_types = None, model_types= None, ):
     custom_objects = {
         'AccuracyHistory':Accuracy.AccuracyHistory,
         'root_mse':Accuracy.root_mse,
@@ -107,15 +107,14 @@ def load_models(model_dir,feature_type = None, model_type= None, ):
     model_files = [x for x in os.listdir(model_dir) if x.endswith('.h5')]
     for model_file in model_files:
         try:
-            print(f'loading model {model_file}...')
-            if  (model_type is None or model_type in  model_file)  and \
-                (feature_type is None or feature_type in model_file):  # check if model has type
+            if  (model_types is None or len([1 for x in model_types if x in model_file])) and \
+                (feature_types is None or len([1 for x in feature_types if x in model_file])):  # check if model has type
+                print(f'loading model {model_file}...')
                 model_path = os.path.join(model_dir,model_file)
                 model_name = model_file.replace('.h5','')
                 models[model_name] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
         except Exception as e:
             print(f'Failed to load model {model_file}, exception message is: {e}')
-            
     return models
 
 
@@ -165,6 +164,21 @@ def get_data_dict(model_types, features, labels):
             X[model_type][feature_type] = format_input_dict(X_feat[feature_type], model_type)    
         
     return X, y
+
+def get_data_dict_2D(features, labels,factor=1):
+    # note that the splitting uses a fixed seed and the labels are the same
+    X = {}
+    y = None
+    feature_types = features.keys()
+    for feature_type in feature_types:
+        feat_size = int( len(features[feature_type]) *factor)
+        feature = features[feature_type][:feat_size,:]
+        labels = labels[:feat_size,:]
+        x, y = TrainTestValid.train_test_validation_split(feature, labels)
+        X[feature_type] = x
+    return X, y
+
+
 
 
 def format_input_dict(x_dict, model_type):
