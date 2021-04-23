@@ -2,7 +2,7 @@
 
 ## Overview
 
-Musical Sheet/Tab Generator	
+Music Notation Generation
 
 ### Description:
 
@@ -17,27 +17,13 @@ Dataset:
 http://theremin.music.uiowa.edu/MISpiano.html
 
 
-### Utilities:
-https://github.com/attejensen/abctool
-https://github.com/g4brielvs/python-tomita
-
-
 ### SoundFonts
 https://github.com/FluidSynth/fluidsynth/wiki/SoundFont
-
 
 ## Algorithms
 - Spectrogram
 - MFCC Spectrogram
     https://en.wikipedia.org/wiki/Mel-frequency_cepstrum#:~:text=From%20Wikipedia%2C%20the%20free%20encyclopedia,nonlinear%20mel%20scale%20of%20frequency.
-
-## Python audio Libraries
-- https://mido.readthedocs.io/en/latest/
-- https://wiki.python.org/moin/PythonInMusic
-
-## Tutorials
-https://github.com/tensorflow/docs/tree/master/site/en/
-
 
 ## Used Datasets
 ### [PIANO Notes Transcription from Kaggle](https://www.kaggle.com/arshadgeek/piano-notes-transcription)
