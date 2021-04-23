@@ -64,11 +64,11 @@ def plot_metric(model, metric):
     plt.show()
 
 
-def plot_roc_curve(predictions, ground_truth):
+def plot_roc_curve(predictions, ground_truth,title='ROC Curve'):
     fpr, tpr, thresholds = roc_curve(tf.reshape(ground_truth,[-1]), tf.reshape(predictions,[-1]))
     plt.plot(fpr, tpr)
     plt.plot([0,1],[0,1])
-    plt.title("ROC Curve")
+    plt.title(title)
     plt.ylabel("True Positives")
     plt.xlabel("False Positives")
     print("Area under curve:", auc(fpr, tpr))
