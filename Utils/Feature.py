@@ -15,6 +15,8 @@ out[3] Wave file sample rate
 out[4] Time in seconds of each array element
 All returned spectrogram have a normalized wave amplitude of 0-1 decibels
 '''
+
+FEATURE_TYPES = ('cqt', 'mel', 'mfcc')
 #%%
 class Feature:
     DB_RANGE = 80.0

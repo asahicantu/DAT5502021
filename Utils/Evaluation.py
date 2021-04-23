@@ -111,32 +111,13 @@ def load_models(model_dir,feature_type = None, model_type= None, ):
             if  (model_type is None or model_type in  model_file)  and \
                 (feature_type is None or feature_type in model_file):  # check if model has type
                 model_path = os.path.join(model_dir,model_file)
-                models[model_file] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
+                model_name = model_file.replace('.h5','')
+                models[model_name] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
         except Exception as e:
             print(f'Failed to load model {model_file}, exception message is: {e}')
             
     return models
 
-
-def load_models(model_dir,feature_type = None, model_type= None, ):
-    custom_objects = {
-        'AccuracyHistory':Accuracy.AccuracyHistory,
-        'root_mse':Accuracy.root_mse,
-        'r2_coeff_determination':Accuracy.r2_coeff_determination
-    }
-    models = {}
-    model_files = [x for x in os.listdir(model_dir) if x.endswith('.h5')]
-    for model_file in model_files:
-        try:
-            print(f'loading model {model_file}...')
-            if  (model_type is None or model_type in  model_file)  and \
-                (feature_type is None or feature_type in model_file):  # check if model has type
-                model_path = os.path.join(model_dir,model_file)
-                models[model_file] = tf.keras.models.load_model(model_path,custom_objects=custom_objects)
-        except Exception as e:
-            print(f'Failed to load model {model_file}, exception message is: {e}')
-            
-    return models
 
 def is_difference_significant(pred_1, pred_2, threshold1, threshold2, labels1, labels2, alpha=0.05):
     """null hypothesis: there no statistically significant difference between the mean accuracy of both classifiers
@@ -168,52 +149,35 @@ def determine_opt_threshold(predictions, labels):
     return thresholds[best_threshold_index]
 
 
-def get_data_dict(features, labels):
-    X_mel, y = TrainTestValid.train_test_validation_split(features['mel'],
-                                                          labels)  # note that the splitting uses a fixed seed and the labels are the same
-    X_mfcc, _ = TrainTestValid.train_test_validation_split(features['mfcc'], labels)
-    X_cqt, _ = TrainTestValid.train_test_validation_split(features['cqt'], labels)
-
-    X_MLP = {}
-    X_MLP['mel'] = format_input_dict(X_mel, 'MLP')
-    X_MLP['mfcc'] = format_input_dict(X_mfcc, 'MLP')
-    X_MLP['cqt'] = format_input_dict(X_cqt, 'MLP')
-
-    X_LSTM = {}
-    X_LSTM['mel'] = format_input_dict(X_mel, 'LSTM')
-    X_LSTM['mfcc'] = format_input_dict(X_mfcc, 'LSTM')
-    X_LSTM['cqt'] = format_input_dict(X_cqt, 'LSTM')
-
-    X_LSTM_M2M = {}
-    X_LSTM_M2M['mel'] = format_input_dict(X_mel, 'LSTM_M2M')
-    X_LSTM_M2M['mfcc'] = format_input_dict(X_mfcc, 'LSTM_M2M')
-    X_LSTM_M2M['cqt'] = format_input_dict(X_cqt, 'LSTM_M2M')
-
+def get_data_dict(model_types,features, labels):
+    # note that the splitting uses a fixed seed and the labels are the same
+    feature_types = features.keys()
+    X_feat = {}
     X = {}
-    X['MLP'] = X_MLP
-    X['MLP_1H'] = X_MLP
-    X['LSTM'] = X_LSTM
-    X['LSTM_M2M'] = X_LSTM_M2M
-
+    y = None
+    for feature_type in feature_types:
+        x, y = TrainTestValid.train_test_validation_split(features[feature_type], labels)
+        X_feat[feature_type] = x
+        
+    for model_type in model_types:
+        X[model_type] = {}
+        for feature_type in feature_types:
+            X[model_type][feature_type] = format_input_dict(X_feat[feature_type], model_type)    
+        
     return X, y
 
 
 def format_input_dict(x_dict, model_type):
     """Formats input dictionary according to model type specific properties.
     Assumes that dictionary content is numpy array"""
-    out = {}
-    if model_type == 'LSTM':
-        out['train'] = x_dict['train'].swapaxes(1, 2)
-        out['test'] = x_dict['test'].swapaxes(1, 2)
-        out['valid'] = x_dict['valid'].swapaxes(1, 2)
-    elif model_type == 'MLP' or model_type == 'MLP_1H' or model_type == 'LSTM_M2M':
-        out['train'] = np.array([x.flatten() for x in x_dict['train']])
-        out['test'] = np.array([x.flatten() for x in x_dict['test']])
-        out['valid'] = np.array([x.flatten() for x in x_dict['valid']])
+    out = x_dict
+    for key in x_dict.keys():
+        if model_type == 'LSTM':
+            out[key] = x_dict[key].swapaxes(1, 2)
+        elif model_type in ( 'MLP', 'MLP_1H' , 'LSTM_M2M'):
+            out[key] = np.array([x.flatten() for x in x_dict[key]])
         if model_type == 'LSTM_M2M':
-            out['train'] = np.array(split_in_sequences(out['train'], 10, keep_short_batch=False))
-            out['test'] = np.array(split_in_sequences(out['test'], 10, keep_short_batch=False))
-            out['valid'] = np.array(split_in_sequences(out['valid'], 10, keep_short_batch=False))
+            out[key] = np.array(split_in_sequences(out[key], 10, keep_short_batch=False))
     return out
 
 

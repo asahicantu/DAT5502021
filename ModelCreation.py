@@ -6,7 +6,7 @@ import numpy as np
 from tqdm  import tqdm
 import matplotlib.pyplot as plt
 from Utils import Misc, Pickle, Preprocess, TrainTestValid, Evaluation
-from Utils.Models import Train
+from Utils.Models import Model
 import datetime
 import tensorflow as tf
 import gc
@@ -30,7 +30,6 @@ def init():
   
 def runModel(feature,
               model_type,
-              model_path,
               log_path,
               X,
               Y,
@@ -67,8 +66,7 @@ def runModel(feature,
     num_classes = y_test.shape[1]
     shape = x_test.shape[1:]
         
-    model = Train.train(
-      model_path,
+    model = Model.train(
       log_path,
       feature,
       x_train,
@@ -80,6 +78,7 @@ def runModel(feature,
       num_classes,
       model_type,
       shape)
+    
     return model
 
 def trainFeatures(
@@ -95,24 +94,23 @@ def trainFeatures(
   ):
   for feature in features.keys():
     x = features[feature]
-    X,Y = TrainTestValid.train_test_validation_split(x,y)
-    X_y_file = os.path.join(pickle_path,f'X_Y_{feature}.pkl')
-    Pickle.dump_pickle(X_y_file,(X,Y))
+    X = None
+    Y = None
     gc.collect()
     for model_type in models_types:
       try:
-        model_file = os.path.join(model_path, f'{feature}_{model_type}.h5')
+        model_file = os.path.join(model_path, f'{model_type}_{feature}.h5')
         if os.path.exists(model_file):
           print(f'Model {model_file} exists. Skipping...')
         else:
-          pass
-        print(f'Processing model {feature}:{model_type}')
-        runModel( feature,model_type,model_path, log_path, X,Y,batch_size,epochs,gpu) 
+          print(f'Processing model {feature}:{model_type}')
+          if X is None and Y  is None:
+             X, Y = TrainTestValid.train_test_validation_split(x,y)
+          model = runModel( feature,model_type, log_path, X,Y,batch_size,epochs,gpu)
+          model.save(model_file)
         gc.collect()
       except Exception as e:
         print(f'Model {feature} {model_type} failed at {e}')
-
-
 
 def parse_args():
   '''Parse arguments'''
@@ -168,10 +166,10 @@ def main():
   features_2D = {x[0]:np.array( x[1], dtype = 'float64')/255 for x in features_2D.items() }
   gc.collect()
   print('Training models for 1-D Features....')
-  trainFeatures(Train.MODELS_1D,features_1D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
+  trainFeatures(Model.MODELS_1D,features_1D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
   gc.collect()
   print('Training models for 2-D Features....')
-  trainFeatures(Train.MODELS_2D,features_2D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
+  trainFeatures(Model.MODELS_2D,features_2D,y,args.pickle_path,args.model_path,args.log_path,args.gpu,args.batch_size,args.epochs)
   end = time.time()
   diff = end - start
   print(f'PRocess Completed in {diff} seconds')
