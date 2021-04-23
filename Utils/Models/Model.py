@@ -44,7 +44,7 @@ def train(log_path,feature, X_train, y_train, X_test, y_test, batch_size, epochs
 
     model = MODELS[model_type](feature, shape, n_classes)
 
-    model_ckpt = os.path.join('Data', 'Out', 'Model_Checkpoint', f'{feature}_{model_type}_ckpt.h5')
+    model_ckpt = os.path.join('Data', 'Out', 'Model_Checkpoint', f'{model_type}_{feature}_ckpt.h5')
     history = Accuracy.AccuracyHistory()
 
     checkpoint = ModelCheckpoint(
