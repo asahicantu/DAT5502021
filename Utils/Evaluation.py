@@ -149,7 +149,7 @@ def determine_opt_threshold(predictions, labels):
     return thresholds[best_threshold_index]
 
 
-def get_data_dict(model_types,features, labels):
+def get_data_dict(model_types, features, labels):
     # note that the splitting uses a fixed seed and the labels are the same
     feature_types = features.keys()
     X_feat = {}
@@ -170,14 +170,14 @@ def get_data_dict(model_types,features, labels):
 def format_input_dict(x_dict, model_type):
     """Formats input dictionary according to model type specific properties.
     Assumes that dictionary content is numpy array"""
-    out = x_dict
+    out = {}
     for key in x_dict.keys():
         if model_type == 'LSTM':
             out[key] = x_dict[key].swapaxes(1, 2)
         elif model_type in ( 'MLP', 'MLP_1H' , 'LSTM_M2M'):
             out[key] = np.array([x.flatten() for x in x_dict[key]])
-        if model_type == 'LSTM_M2M':
-            out[key] = np.array(split_in_sequences(out[key], 10, keep_short_batch=False))
+            if model_type == 'LSTM_M2M':
+                out[key] = np.array(split_in_sequences(out[key], 10, keep_short_batch=False))
     return out
 
 
