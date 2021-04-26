@@ -117,3 +117,24 @@ def CNN2D_CUSTOM(feature,shape, n_classes):
     return model
 
 
+def CNN2D_V3(feature,shape, n_classes):
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(5,5), strides=(1,1),activation='tanh',input_shape=shape))
+    model.add(Dropout(0.5))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
+    model.add(Conv2D(64, (3,3), activation='tanh'))
+    model.add(Dropout(0.5))
+    model.add(MaxPooling2D(pool_size=(2,2)))
+    #model.add(Conv2D(64, (5,5), activation='relu'))
+    # Final output layer
+    #model.add(Conv2D(128, (5,5), activation='sigmoid'))
+    #model.add(Flatten())
+    model.add(Flatten())
+    #model.add(Dense(64, activation='sigmoid'))
+    model.add(Dense(n_classes, activation='sigmoid'))
+
+    model.compile(loss=keras.losses.binary_crossentropy,
+            optimizer=keras.optimizers.Adam(lr=.0001, decay=1e-6),
+            metrics=['accuracy'])
+
+    return model

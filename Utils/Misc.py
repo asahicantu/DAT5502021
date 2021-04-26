@@ -30,7 +30,8 @@ def vec2img(vec,fmax,sr,scale,img_type):
     buf.shape = ( w, h,3 )
     w = int(w/scale)
     h = int(h/scale)
-    img = Image.fromarray(buf).resize((h,w),Image.ANTIALIAS)
+    size = (80,106)
+    img = Image.fromarray(buf).resize(size,Image.ANTIALIAS)
     buf =  np.asarray(img)
     return buf
 

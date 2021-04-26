@@ -16,6 +16,7 @@ MODELS = {'CNN1D': CNN.CNN1D,
           'CNN2D': CNN.CNN2D,
           'ALEXNET': CNN.ALEXNET,
           'CNN2D_V2': CNN.CNN2D_V2,
+          'CNN2D_V3': CNN.CNN2D_V3,
           'CNN2D_CUSTOM': CNN.CNN2D_CUSTOM,
           'LSTM': LSTM.LSTM,
           'LSTM_M2M': LSTM.LSTM_M2M,
@@ -27,6 +28,7 @@ MODELS_2D = [
     'CNN2D',
     'ALEXNET',
     'CNN2D_V2',
+    'CNN2D_V3',
     'CNN2D_CUSTOM'
 ]
 

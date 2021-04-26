@@ -36,6 +36,15 @@ MIDI_OFFSET = 21 # Note A0 starts at MIDI value 21. Required an offset to match 
 # The default tempo is 120 BPM.
 # (500000 microseconds per beat (quarter note).)
 
+def get_midi_file(midi_file,tempo = 1/8):
+    if os.path.exists(midi_file):
+        mid = load_midi(midi_file)     
+        midi_split = split_midi(mid,verbose=False,note_factor = tempo)
+        return midi_split
+    else :
+        raise SystemError(f"Path {directory_path} does not exist")
+
+
 def get_midi_files(directory_path,max_elements = sys.maxsize,tempo = 1/16, verbose = False):
     files = dict()
     note_factor = tempo
