@@ -1,0 +1,11 @@
+*.log
+*.wav
+*.pkl
+__pycache__
+.ipynb_checkpoints/*
+.vscode
+fluidsynth
+logs
+Data/Out/*
+!Data/Out/Model/
+
